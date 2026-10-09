@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env*
+!.env.example
+*.local
+test-results/
+playwright-report/
+.DS_Store
+*.tsbuildinfo
+.playwright-mcp/
+.wrangler/
+public/codex-bridge.mjs
+public/agent-bridge.mjs

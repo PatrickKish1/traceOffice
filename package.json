@@ -1,0 +1,36 @@
+{
+  "name": "trace-office",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3000",
+    "build": "node scripts/build-bridge.mjs && tsc -b && vite build",
+    "dev:relay": "wrangler dev --port 8787 --var ALLOWED_ORIGIN:http://127.0.0.1:3000",
+    "preview": "vite preview --host 127.0.0.1 --port 3000",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "neatlogs:send": "node --env-file=.env scripts/send-neatlogs-trace.mjs",
+    "jev:trim": "ffmpeg -y -i nameisjev.mp3 -ss 6.9 -vn -acodec libmp3lame -q:a 4 public/nameisjev.mp3"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
+    "lucide-react": "^0.563.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.183.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "esbuild": "^0.25.12",
+    "neatlogs": "^1.1.26",
+    "typescript": "^5",
+    "vite": "^6.4.1",
+    "wrangler": "^4.148.0"
+  }
+}

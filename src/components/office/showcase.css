@@ -1,0 +1,17 @@
+.showcase-activity {
+  flex-shrink: 0;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid #2a3a34;
+  border-radius: 9px;
+  background: #1c2823;
+}
+.showcase-activity > b { color: #c5ddd0; font-size: 11px; }
+.showcase-activity > div { display: grid; gap: 3px; margin-top: 10px; }
+.showcase-activity span { font-size: 11px; font-weight: 600; }
+.showcase-activity small { font-size: 11px; color: #a8c4b4; }
+@media (max-width: 760px) {
+  .showcase-activity { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .showcase-activity > b { grid-column: 1 / -1; }
+  .showcase-activity > div { min-width: 0; margin: 0; }
+}
