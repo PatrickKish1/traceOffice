@@ -1,0 +1,42 @@
+https://github.com/lohithadamisetti123/cinematic-portfolio
+
+clone this repo into PROJECTS and lets run it]
+
+---
+
+https://github.com/lohithadamisetti123/3D-portfolio-Public.git
+
+stop runnning to previoud one and cline this one
+
+---
+
+[plugin:vite:import-analysis] Failed to resolve import "../assets/about/lohitha-avatar.png" from "src/components/About.jsx". Does the file exist?
+/Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/src/components/About.jsx:2:23
+1  |  import React from "react";
+2  |  import stackImage from "../assets/about/lohitha-avatar.png";
+   |                          ^
+3  |  import { aboutContent } from "../data/portfolioData";
+4  |  var _jsxFileName = "/Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/src/components/About.jsx";
+    at TransformPluginContext._formatLog (file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:8766:39)
+    at TransformPluginContext.error (file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:8763:14)
+    at normalizeUrl (file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:26632:18)
+    at async file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:26702:30
+    at async Promise.all (index 1)
+    at async TransformPluginContext.transform (file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:26668:4)
+    at async EnvironmentPluginContainer.transform (file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:8545:14)
+    at async loadAndTransform (file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:20184:26)
+    at async viteTransformMiddleware (file:///Volumes/PATRICK-512/PROJECTS/3D-portfolio-Public/node_modules/.pnpm/vite@8.3.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:20404:20)
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.js.
+
+did not load due to this
+
+---
+
+https://github.com/morluto/rea
+
+clone this as well and see whats about
+
+---
+
+is there anything weird about it like is the code sketchy and unfounded i noticed htere is a lot of issues with it like issues opened for it and some PRs as well lets get to working and fixing those issues. no need to ever commmit them but then fixing them means we can get a proper version working
