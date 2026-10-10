@@ -126,3 +126,12 @@ test("platforms stack as separate floors and keep every session", () => {
   assert.deepEqual(floors, ["cursor", "claude", "codex", "grok"]);
   assert.equal(FLOOR_GAP, 10);
 });
+
+test("a second project gets its own platform floor", () => {
+  const floors = stackFloors([
+    { harness: "cursor", project: "OpenAI-hack" },
+    { harness: "cursor", project: "SIKADESK" },
+    { harness: "claude", project: "SIKADESK" },
+  ]);
+  assert.deepEqual(floors, ["OpenAI-hack::cursor", "SIKADESK::cursor", "SIKADESK::claude"]);
+});

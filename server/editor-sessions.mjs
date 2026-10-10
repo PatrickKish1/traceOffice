@@ -1,9 +1,11 @@
+import { createReadStream } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
+import readline from "node:readline";
+import { absorbTranscriptRecord, activityFromSummary, emptySummary, helperAgents, sessionIdentity } from "./editor-ops.mjs";
 
 const ACTIVE_MS = 5 * 60 * 1000;
-const ID = /^[a-zA-Z0-9_-]{8,80}$/;
 
 /** Working if the session file changed in the last five minutes. Does not open the file. */
 export function editorSessionStatus(mtimeMs, now = Date.now()) {
@@ -52,31 +54,51 @@ async function matchingProjectDirs(root, project) {
     .map((entry) => path.join(root, entry.name));
 }
 
-function agentFromFile(harness, file, info, now) {
-  const folder = path.basename(path.dirname(file));
-  const stem = path.basename(file, ".jsonl");
-  const id = ID.test(folder) ? folder : ID.test(stem) ? stem : null;
-  if (!id) return null;
+async function summarizeFile(file, size) {
+  const summary = emptySummary();
+  if (size > 8_000_000) return summary;
+  const lines = readline.createInterface({ input: createReadStream(file), crlfDelay: Infinity });
+  let count = 0;
+  for await (const line of lines) {
+    count += 1;
+    if (count > 2500) break;
+    try {
+      absorbTranscriptRecord(summary, JSON.parse(line));
+    } catch {
+      /* Skip a broken line. */
+    }
+  }
+  return summary;
+}
+
+function agentFromFile(harness, file, info, now, summary) {
+  const identity = sessionIdentity(file, path.sep);
+  if (!identity) return null;
   const updatedAt = new Date(info.mtimeMs).toISOString();
-  const status = editorSessionStatus(info.mtimeMs, now);
+  const status = summary?.turn === "error" ? "error" : editorSessionStatus(info.mtimeMs, now);
+  const activity = activityFromSummary(summary);
+  const nested = Boolean(identity.parentId);
   return {
-    id: `${harness}:${id}`,
-    name: harness === "cursor" ? "Cursor agent" : "Claude Code",
+    id: `${harness}:${identity.id}`,
+    name: nested ? (harness === "cursor" ? "Cursor helper" : "Claude helper") : (harness === "cursor" ? "Cursor agent" : "Claude Code"),
     harness,
     model: null,
     status,
-    task: status === "working" ? "Session file is active" : "Session file is quiet",
+    task: activity ?? (status === "working" ? "Session file is active" : "Session file is quiet"),
     contextUsed: null,
     contextWindow: null,
     updatedAt,
-    sourceUrl: `session://${harness}/${encodeURIComponent(id)}`,
-    history: [{ at: updatedAt, status, label: status === "working" ? "Session file updated" : "No recent file update" }],
+    activityLabel: activity,
+    sourceUrl: `session://${harness}/${encodeURIComponent(identity.id)}`,
+    history: [{ at: updatedAt, status, label: activity ?? (status === "working" ? "Session file updated" : "No recent file update") }],
+    parentId: identity.parentId ? `${harness}:${identity.parentId}` : null,
+    summary,
   };
 }
 
 /**
  * Cursor and Claude Code sessions for this project.
- * Only file names and modification times are used. Transcripts are never opened.
+ * Tool names are counted. Prompt text is not kept.
  */
 export async function readEditorSessions({
   project = process.env.DOTS_SESSION_CWD ?? process.env.TRACE_SESSION_CWD ?? process.cwd(),
@@ -98,37 +120,50 @@ export async function readEditorSessions({
       await collectJsonl(dir, 0, files);
     }
   }
-  const agents = [];
+  const found = [];
   for (const file of files) {
-    const harness = file.includes(`${path.sep}.cursor${path.sep}`) ? "cursor" : "claude";
+    const harnessName = file.includes(`${path.sep}.cursor${path.sep}`) ? "cursor" : "claude";
     let info;
     try {
       info = await stat(file);
     } catch {
       continue;
     }
-    const agent = agentFromFile(harness, file, info, now);
-    if (agent) agents.push(agent);
+    const summary = await summarizeFile(file, info.size);
+    const agent = agentFromFile(harnessName, file, info, now, summary);
+    if (agent) found.push(agent);
   }
-  agents.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+  found.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
   const unique = [];
   const seen = new Set();
-  for (const agent of agents) {
+  for (const agent of found) {
     if (seen.has(agent.id)) continue;
     seen.add(agent.id);
-    unique.push(agent);
-    if (unique.length >= 24) break;
+    const { summary, parentId, ...publicAgent } = agent;
+    unique.push(publicAgent);
+    if (parentId) unique.at(-1).parentId = parentId;
+    for (const helper of helperAgents(publicAgent, summary)) {
+      if (seen.has(helper.id)) continue;
+      seen.add(helper.id);
+      unique.push({ ...helper, parentId: publicAgent.id });
+    }
+    if (unique.length >= 40) break;
   }
-  if (!unique.length) {
+  const published = unique.slice(0, 40).map(({ parentId, ...agent }) => agent);
+  const ids = new Set(published.map((agent) => agent.id));
+  const interactions = unique
+    .filter((agent) => agent.parentId && ids.has(agent.id) && ids.has(agent.parentId))
+    .map((agent) => ({ fromId: agent.parentId, toId: agent.id, at: agent.updatedAt, kind: "delegation" }));
+  if (!published.length) {
     const who = harness === "cursor" ? "Cursor" : harness === "claude" ? "Claude Code" : "Cursor or Claude Code";
     throw new Error(`No ${who} sessions were found for this project. Start one here, or import a snapshot.`);
   }
   return {
     version: 1,
-    agents: unique,
-    interactions: [],
+    agents: published,
+    interactions,
     project: path.basename(project),
-    total: unique.length,
+    total: published.length,
     observedAt: new Date(now).toISOString(),
   };
 }

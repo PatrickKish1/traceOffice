@@ -60,6 +60,16 @@ Neatlogs is the trace store. It is not this office, and connecting Cursor inside
 
 The floor today is driven by local session files: Cursor, Claude Code, Codex, and Grok. Each platform is its own stacked floor. A file touched in the last five minutes sits and works. Click a character for the status that file reported.
 
+Opening the office discovers Cursor, Claude Code, Codex, and Grok sessions for the folder you started it in, including ones that are quiet. Other local projects appear as connections in the sidebar. Each platform is a floor, and a second project gets its own floors. A spawned subagent is a smaller helper on that floor. The first time a session is seen, and again when its status or tool list changes, it is sent to Neatlogs as a workflow span named `claude-session` or `cursor-session`. The span carries the session UUID, the platform, the status, and tool names with counts. It does not carry the chat. Set `NEATLOGS_API_KEY` from the project’s Settings → API Keys and restart `pnpm dev`. The dashboard shows those spans under the workflow `trace-office`.
+
+Tool-by-tool Claude traces (each prompt, Read, Edit, and Bash) come from Neatlogs’ own Claude Code hooks, which use that same session UUID:
+
+```sh
+npx @neatlogs/claude-code setup --global --api-key "$NEATLOGS_API_KEY"
+```
+
+Restart Claude Code after that. The office still only needs the session file time to show who is operating. The hooks are what fill the trace tree.
+
 ## Direction
 
 The office stays the control room. The next slice is to drive those same characters from Neatlogs traces, and to open the real trace when you click one. Local file watch remains the path that works without a token.

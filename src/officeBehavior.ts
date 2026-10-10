@@ -48,22 +48,44 @@ export function loungeLayout(total: number) {
 export const FLOOR_GAP = 10;
 const FLOOR_PREFERENCE = ["cursor", "claude", "codex", "grok", "chatgpt"];
 
-export function floorKey(harness: string) {
-  if (harness === "local") return "codex";
-  return harness || "office";
+export function floorKey(agent: { harness: string; project?: string | null }, multi = false) {
+  const platform = agent.harness === "local" ? "codex" : agent.harness || "office";
+  if (!multi || !agent.project) return platform;
+  return `${agent.project}::${platform}`;
 }
 
-/** Platforms present, Cursor then Claude then Codex then Grok, then anything else. */
-export function stackFloors(agents: { harness: string }[]) {
+export function floorHeading(key: string) {
+  const [project, platform] = key.split("::");
+  if (platform) return { title: platform.toUpperCase(), project };
+  return { title: key.toUpperCase(), project: "" };
+}
+
+/** One floor per platform. A second connected project splits that platform into another floor. */
+export function stackFloors(agents: { harness: string; project?: string | null }[]) {
+  const projects = [...new Set(agents.map((agent) => agent.project).filter((project): project is string => Boolean(project)))];
+  const multi = projects.length > 1;
   const present: string[] = [];
   for (const agent of agents) {
-    const key = floorKey(agent.harness);
+    const key = floorKey(agent, multi);
     if (!present.includes(key)) present.push(key);
   }
-  return [
-    ...FLOOR_PREFERENCE.filter((key) => present.includes(key)),
-    ...present.filter((key) => !FLOOR_PREFERENCE.includes(key)),
-  ];
+  if (!multi) {
+    return [
+      ...FLOOR_PREFERENCE.filter((key) => present.includes(key)),
+      ...present.filter((key) => !FLOOR_PREFERENCE.includes(key)),
+    ];
+  }
+  const ordered: string[] = [];
+  for (const project of [...projects].sort()) {
+    for (const platform of FLOOR_PREFERENCE) {
+      const key = `${project}::${platform}`;
+      if (present.includes(key)) ordered.push(key);
+    }
+    for (const key of present) {
+      if (key.startsWith(`${project}::`) && !ordered.includes(key)) ordered.push(key);
+    }
+  }
+  return ordered;
 }
 
 export function officeLayout(total: number) {

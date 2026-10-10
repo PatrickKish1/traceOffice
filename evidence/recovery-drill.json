@@ -1,0 +1,8 @@
+{
+  "sessionId": "office:recovery-drill",
+  "workflow": "trace-office",
+  "failedAt": "2026-10-10T19:46:26.157Z",
+  "recoveredAt": "2026-10-10T19:46:28.368Z",
+  "failedTrace": null,
+  "recoveredTrace": null
+}

@@ -30,6 +30,8 @@ export interface OfficeAgent {
   /** Name supplied by the uploader; not a verified account identity. */
   ownerName?: string;
   harness: string;
+  /** Folder label when more than one project is connected. */
+  project?: string;
   model: string | null;
   status: AgentStatus;
   task: string | null;
@@ -40,6 +42,8 @@ export interface OfficeAgent {
   disconnectedAt?: string;
   character?: CharacterKind;
   sourceUrl?: string;
+  /** Dashboard URL for this session when Neatlogs returned a trace id. */
+  traceUrl?: string;
   history?: RecordedActivity[];
   activityLabel?: string | null;
   health?: RunHealth;

@@ -1,0 +1,7 @@
+Entire CLI 0.11.4
+Enabled on branch main
+Agent: Cursor
+Checkpoints sync to: origin
+Settings: .entire/settings.json
+Hooks: .cursor/hooks.json
+Checkpoint id: none yet. Entire writes a checkpoint when the next commit is made.

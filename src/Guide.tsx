@@ -10,7 +10,7 @@ export default function Guide() {
       <ol>
         <li><b>Open the room.</b> http://127.0.0.1:3000 is enough. No key is required.</li>
         <li><b>Choose the people.</b> Room studio → Characters. Pick a character pack and a manager, then Apply to room. Trace, Signal, Patch, Relay, and Jev all swap looks together; names stay the same.</li>
-        <li><b>Bring real sessions.</b> Import agents, pick a platform tile, then choose local files or the cloud connect screen. Local is what seats a character. A file touched in the last five minutes sits and works. The preview crew steps aside while that feed is connected.</li>
+        <li><b>Bring real sessions.</b> The office discovers Cursor, Claude Code, Codex, and Grok by itself when you open it on this computer. A session is seated when the file exists, even if it is quiet. A file touched in the last five minutes sits and works. Each platform gets its own floor. The preview crew steps aside while any session is seated.</li>
       </ol>
     </section>
 
@@ -28,9 +28,20 @@ export default function Guide() {
     </section>
 
     <section>
+      <h2>Discovery</h2>
+      <p>Opening the office starts a local discovery pass for the folder you started it in. Quiet sessions stay on the floor. A different platform adds another floor. The sidebar also lists other Cursor and Claude projects on this computer. Press one to connect it, the same way you connect a platform. Up to four projects can be open. Each project keeps its own platform floors, so Cursor in one repo is not the Cursor floor of another.</p>
+      <p>A nested session file, or a Task / Agent tool that names a <code>subagent_type</code>, shows up as a smaller helper on that same floor. The helper is the spawned worker. The parent stays the session you prompted.</p>
+      <p>Prompt in Cursor or Claude Code, in this project. Within a few seconds the office seats that session. This room does not send the prompt for you. Cursor and Claude Code still own the conversation. Disconnect local sessions in the sidebar if you want the preview crew back.</p>
+    </section>
+
+    <section>
       <h2>Neatlogs</h2>
-      <p>TraceOffice is not a second Neatlogs. Neatlogs stores traces and already has the coding-agent Connect buttons for Claude Code, Codex, and Cursor. This office does not call those APIs. The ingest key in <code>.env</code> can send traces in. It cannot list them back out, and nothing in the 3D room reads the Neatlogs trace list. The floor only shows sessions this app reads locally, or a snapshot you import.</p>
-      <p>Cloud in Import agents opens <a href="https://app.neatlogs.com/settings/account/coding-agents">Neatlogs coding agents</a> so you approve the tool there. That approval does not copy cloud agents onto the floor yet. Local watch is the path that does.</p>
+      <p>TraceOffice is the office. Neatlogs is the record. The floor shows who is seated. Neatlogs stores a span for each discovered session: the session UUID, the platform, whether it is working or quiet, and the tool names that session used. Prompt text is not sent.</p>
+      <p>Put the project key in <code>NEATLOGS_API_KEY</code>. Create it in the Neatlogs project under Settings → API Keys. Restart <code>pnpm dev</code> after changing it. The first time discovery sees a session, that span is sent. Later polls send again only when the status or the tool list changes.</p>
+      <p>Claude Code can also report each turn and each tool by itself. That uses the same session UUID Claude prints for <code>--resume</code>. From a terminal:</p>
+      <pre><code>npx @neatlogs/claude-code setup --global --api-key "$NEATLOGS_API_KEY"</code></pre>
+      <p>Restart Claude Code after that command. The hooks write the key to <code>~/.config/neatlogs/config.json</code> and register themselves in <code>~/.claude/settings.json</code>. Those traces are the full tool tree. The office still only needs the session file to show who is on the Claude floor.</p>
+      <p>Cursor does not emit those hooks for a local chat. Connecting Cursor on the Neatlogs coding-agents page starts a Neatlogs cloud agent. It does not stream this IDE session. Discovery is the Cursor path: the transcript UUID, plus tool names and counts from that file, show up as a <code>cursor-session</code> workflow. Cloud in Import agents opens <a href="https://app.neatlogs.com/settings/account/coding-agents">Neatlogs coding agents</a> for the cloud approval. That approval does not copy cloud agents onto the floor.</p>
     </section>
 
     <section>

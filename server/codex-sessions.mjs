@@ -7,6 +7,10 @@ import path from "node:path";
 import { toolActivityLabel } from "./activity-label.mjs";
 import { readGrokSessions } from "./grok-sessions.mjs";
 import { readEditorSessions } from "./editor-sessions.mjs";
+import { reportOfficeSessions } from "./neatlogs-report.mjs";
+import { discoverSessions } from "./discover-sessions.mjs";
+import { drillAgent, runRecoveryDrill } from "./floor-agent.mjs";
+import { traceFor } from "./trace-links.mjs";
 
 const MAX_TAIL_BYTES = 2 * 1024 * 1024;
 const ACTIVE_LEASE_MS = 5 * 60 * 1000;
@@ -311,13 +315,28 @@ export function localCodexPlugin() {
           const requestUrl = new URL(req.url, "http://localhost");
           const source = requestUrl.searchParams.get("source") ?? fallback;
           const harness = requestUrl.searchParams.get("harness");
-          if (source === "grok") res.end(JSON.stringify(await readGrokSessions()));
-          else if (source === "editors") res.end(JSON.stringify(await readEditorSessions({ harness: harness === "cursor" || harness === "claude" ? harness : null })));
-          else if (source === "workspace" || source === "index") res.end(JSON.stringify(await readRobotsSessions()));
+          const projects = (requestUrl.searchParams.get("projects") ?? "").split(",").map((item) => item.trim()).filter(Boolean).slice(0, 4);
+          let payload;
+          if (source === "discover") payload = await discoverSessions({ projects });
+          else if (source === "grok") payload = await readGrokSessions();
+          else if (source === "editors") payload = await readEditorSessions({ harness: harness === "cursor" || harness === "claude" ? harness : null });
+          else if (source === "workspace" || source === "index") payload = await readRobotsSessions();
           else {
             res.statusCode = 400;
             res.end(JSON.stringify({ error: "Unknown session source." }));
+            return;
           }
+          const seated = drillAgent();
+          if (seated && !payload.agents.some((agent) => agent.id === seated.id)) payload.agents = [...payload.agents, seated];
+          const neatlogs = await reportOfficeSessions(payload.agents).catch((error) => ({
+            sent: 0,
+            reason: error instanceof Error ? error.message : "Neatlogs report failed",
+          }));
+          payload.agents = payload.agents.map((agent) => {
+            const link = traceFor(agent.id);
+            return link ? { ...agent, traceUrl: link.url } : agent;
+          });
+          res.end(JSON.stringify({ ...payload, neatlogs }));
         } catch (error) {
           res.statusCode = 503;
           res.end(
@@ -329,6 +348,25 @@ export function localCodexPlugin() {
           );
         }
       };
+      server.middlewares.use("/api/office/recover", async (req, res) => {
+        if (!localRequestAllowed(req)) {
+          res.statusCode = 403;
+          res.end(JSON.stringify({ error: "Use the local office on this computer." }));
+          return;
+        }
+        if (req.method !== "POST") {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: "Recovery check is a POST." }));
+          return;
+        }
+        try {
+          const result = await runRecoveryDrill();
+          res.end(JSON.stringify(result));
+        } catch (error) {
+          res.statusCode = 503;
+          res.end(JSON.stringify({ error: error instanceof Error ? error.message : "Recovery check failed." }));
+        }
+      });
       server.middlewares.use("/api/local-agents", (req, res) => serveLocal(req, res, "grok"));
       server.middlewares.use("/api/local-codex/robots", (req, res) => serveLocal(req, res, "index"));
     },

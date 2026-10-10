@@ -36,6 +36,8 @@ import {
   officeSummary,
 } from "./officeActivity";
 import { STATUS_LABELS, liveInteractions } from "./officeBehavior";
+import { floorAdvice } from "./floorAdvice";
+import { BUSINESS_PLAN } from "./businessPlan";
 import { useRobotsSessions } from "./integrations/codex/useRobotsSessions";
 import { useLiveRoom } from "./integrations/codex/useLiveRoom";
 import LiveRoomBar from "./components/import/LiveRoomBar";
@@ -87,6 +89,10 @@ export default function App() {
   const [interactionClock, setInteractionClock] = useState(Date.now());
   const [paused, setPaused] = useState(false);
   const [jevMuted, setJevMutedState] = useState(() => isJevMuted());
+  const [planOpen, setPlanOpen] = useState(false);
+  const [drill, setDrill] = useState<OfficeAgent | null>(null);
+  const [drillError, setDrillError] = useState("");
+  const [drillRunning, setDrillRunning] = useState(false);
   const [night, setNight] = useState(true);
   const [cameraKey, setCameraKey] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -145,7 +151,8 @@ export default function App() {
     const timer = setInterval(() => setInteractionClock(Date.now()), 5000);
     return () => clearInterval(timer);
   }, [interactions.length, live.interactions.length]);
-  const sourceAgents = live.roomId ? live.agents : guest?.agents ?? visibleAgents;
+  const baseAgents = live.roomId ? live.agents : guest?.agents ?? visibleAgents;
+  const sourceAgents = drill && !baseAgents.some((agent) => agent.id === drill.id) ? [...baseAgents, drill] : baseAgents;
   const roomAgents = sourceAgents.filter(agent => agentIsVisible(agent));
   useEffect(() => {
     const expires = sourceAgents.filter(agent => agent.status === 'offline' && agentIsVisible(agent))
@@ -155,6 +162,24 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [sourceAgents, interactionClock]);
   const summary = officeSummary(roomAgents);
+  const advice = floorAdvice(roomAgents);
+  async function runRecovery() {
+    setDrillRunning(true);
+    setDrillError("");
+    try {
+      const response = await fetch("/api/office/recover", { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Recovery check failed.");
+      if (data.agent) {
+        setDrill(data.agent);
+        setSelected(data.agent.id);
+      }
+    } catch (error) {
+      setDrillError(error instanceof Error ? error.message : "Recovery check failed.");
+    } finally {
+      setDrillRunning(false);
+    }
+  }
   const activeLinks = live.roomId ? liveInteractions(roomAgents, live.interactions, interactionClock)
     : guest || (local.enabled && local.state !== "connected")
       ? [] : liveInteractions(roomAgents, interactions, interactionClock);
@@ -212,6 +237,7 @@ export default function App() {
         </nav>}
         <div className="topbar-actions">
           {guest && <button className="import-button" onClick={joinGuest}><Users size={15} /> Join snapshot with my agents</button>}
+          {!guest && <button className="studio-button" onClick={() => setPlanOpen(true)}>Business plan</button>}
           {!guest && <a className="studio-button" href="/guides">Guide</a>}
           {!guest && <button className="studio-button" onClick={() => setStudioTab("profile")}><Palette size={15} /> Room studio</button>}
           {!guest && <button className="studio-button social-top-button" title="Import LinkedIn or X" onClick={() => setStudioTab("social")}><Globe2 size={15} /> Import social</button>}
@@ -222,7 +248,18 @@ export default function App() {
         <aside className={`sidebar ${guest ? "guest-sidebar" : ""}`}>
           <div className="eyebrow"><span /> {guest ? "FRIEND'S ROOM" : "A NEW WAY TO WORK"}</div>
           <h1>{guest ? guest.profile.displayName : profile.displayName === "My room" ? <>Running is not<br />{" "}the same as working<span>.</span></> : <>{profile.displayName}<span>.</span></>}</h1>
-          <p className="intro">{guest ? "Join combines these shared agents with yours in this browser. Changes are not sent to the host." : profile.interests || "A spatial office for agent runs. Watch them work, fail, and hand work off."}</p>
+          <p className="intro">{guest ? "Join combines these shared agents with yours in this browser. Changes are not sent to the host." : profile.interests || "The office shows who is seated. Neatlogs keeps the record of what they did."}</p>
+          {!guest && (
+            <section className="floor-agent" aria-label="Floor agent">
+              <b>{advice.title}</b>
+              <p>{advice.detail}</p>
+              <div>
+                {advice.agentId && <button type="button" onClick={() => selectAgent(advice.agentId!)}>Show that session</button>}
+                <button type="button" disabled={drillRunning} onClick={runRecovery}>{drillRunning ? "Checking…" : "Run recovery check"}</button>
+              </div>
+              {drillError && <small role="alert">{drillError}</small>}
+            </section>
+          )}
           {visibleProfile.socialUrl && <a className="social-link" href={visibleProfile.socialUrl} target="_blank" rel="noreferrer">View social profile <ArrowUpRight size={12} /></a>}
           <div className="section-heading">
             {guest ? "SHARED AGENTS" : "YOUR OFFICE"}
@@ -248,7 +285,7 @@ export default function App() {
                   </span>
                   <span>
                     <b title={agentDisplayName(a)}>{agentDisplayName(a)}</b><small>{a.name}</small>
-                    <small>{behavior(a)}</small>
+                    <small>{a.project ? `${a.project} · ` : ""}{behavior(a)}</small>
                   </span>
                   <ChevronRight size={15} />
                 </button>
@@ -286,6 +323,15 @@ export default function App() {
                   {roomAgents.length} recent sessions
                   {local.total ? ` of ${local.total}` : ""}
                 </span>
+                {local.catalog.length > 0 && (
+                  <div className="project-picks" aria-label="Projects">
+                    {[...local.catalog.filter((item) => item.connected), ...local.catalog.filter((item) => !item.connected)].slice(0, 8).map((item) => (
+                      <button key={item.id} type="button" aria-pressed={item.connected} onClick={() => local.toggleProject(item.id)}>
+                        {item.label} · {item.sessions}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <button
                   onClick={() => {
                     local.disconnect();
@@ -449,6 +495,12 @@ export default function App() {
                       </div>
                       {guest?.stats?.agentTotals?.[agent.id] && <><div><dt>Total tokens</dt><dd>{guest.stats.agentTotals[agent.id].totalTokens === null ? "Not reported" : guest.stats.agentTotals[agent.id].totalTokens!.toLocaleString()}</dd></div><div><dt>Spend</dt><dd>{guest.stats.agentTotals[agent.id].totalSpend === null ? "Not reported" : `USD ${guest.stats.agentTotals[agent.id].totalSpend!.toFixed(2)}`}</dd></div></>}
                     </dl>
+                    {agent.traceUrl ? (
+                      <a className="detail-link" href={agent.traceUrl} target="_blank" rel="noreferrer">Open this session in Neatlogs <ArrowUpRight size={13} /></a>
+                    ) : (
+                      <button type="button" className="detail-link" onClick={() => navigator.clipboard.writeText(agent.id)}>Copy session id for Neatlogs</button>
+                    )}
+                    <small>Workflow trace-office. The office shows who is seated. Neatlogs shows the trace.</small>
                     <small>
                       Source event {new Date(agent.updatedAt).toLocaleString()}
                     </small>
@@ -539,6 +591,24 @@ export default function App() {
         </span>
       </footer>
       {!guest && studioTab && <RoomStudio key={studioTab} initialTab={studioTab} profile={profile} onProfile={setProfile} books={books} onBooks={setBooks} projects={projects} onProjects={setProjects} stats={stats} onStats={setStats} share={share} onShare={setShare} agents={roomAgents} onClose={() => setStudioTab(null)} />}
+      {planOpen && !guest && (
+        <div className="plan-sheet" role="dialog" aria-label="Business plan">
+          <button type="button" className="close" aria-label="Close business plan" onClick={() => setPlanOpen(false)}><X size={16} /></button>
+          <p className="eyebrow"><span /> PREPARED FOR CFO.AI</p>
+          <h2>Hosted room, {BUSINESS_PLAN.price}</h2>
+          <p>{BUSINESS_PLAN.offer}</p>
+          <table>
+            <thead><tr><th></th><th>Base</th><th>Growth</th></tr></thead>
+            <tbody>
+              {BUSINESS_PLAN.rows.map((row) => (
+                <tr key={row.label}><td>{row.label}</td><td>{row.base}</td><td>{row.growth}</td></tr>
+              ))}
+            </tbody>
+          </table>
+          <p>{BUSINESS_PLAN.runwayNote}</p>
+          <small>These figures are planning assumptions. Saving them into a live cfo.ai workspace still needs browser sign-in at the cfo.ai MCP connection.</small>
+        </div>
+      )}
       {welcome && !guest && <Welcome live={live} existingCount={roomAgents.length} onExplore={dismissWelcome} onWatchLocal={watchLocal} onSocialImport={() => { dismissWelcome(); setStudioTab("social"); }} onImport={(imported, importedLinks) => {
         addAgents(imported, importedLinks);
         setInteractionClock(Date.now());

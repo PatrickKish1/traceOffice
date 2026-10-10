@@ -48,6 +48,7 @@ import {
   officePose,
   FLOOR_GAP,
   floorKey,
+  floorHeading,
   stackFloors,
   type LiveInteraction,
 } from "../officeBehavior";
@@ -418,9 +419,10 @@ function Walker({
       const state = showcaseState(elapsed, showcase.index);
       if (state.phase !== showcase.state.phase) showcase.onActivity(showcase.index, state);
     }
-    if (visual.current) {
+      if (visual.current) {
       const impact = hitAt === undefined || reducedMotion ? 0 : Math.max(0, 1 - (performance.now() - hitAt) / 400);
-      visual.current.scale.set(1 + impact * 0.18, 1 - impact * 0.2, 1 + impact * 0.18);
+      const helper = id.includes(":helper:") || agent?.name.startsWith("Helper") || agent?.name.endsWith(" helper") ? 0.62 : 1;
+      visual.current.scale.set(helper + impact * 0.18, helper - impact * 0.2, helper + impact * 0.18);
       visual.current.rotation.z = Math.sin(impact * Math.PI * 3) * 0.15;
       if (nukeStartedAt !== null && !reducedMotion) {
         const phase = nukePhase(nukeStartedAt);
@@ -550,13 +552,14 @@ function Jev({
       return;
     }
     const floors = stackFloors(agents);
+    const multi = floors.some((item) => item.includes("::"));
     for (let index = 0; index < agents.length; index++) {
       const agent = agents[index];
       if (seenAgents.current.has(agent.id)) continue;
       seenAgents.current.add(agent.id);
       if (agent.status === "working" || agent.status === "unknown") {
-        const key = floorKey(agent.harness);
-        const localIndex = agents.filter((item) => floorKey(item.harness) === key).findIndex((item) => item.id === agent.id);
+        const key = floorKey(agent, multi);
+        const localIndex = agents.filter((item) => floorKey(item, multi) === key).findIndex((item) => item.id === agent.id);
         agentQueue.current.push({ index, localIndex, y: Math.max(0, floors.indexOf(key)) * FLOOR_GAP });
       }
     }
@@ -732,7 +735,7 @@ export default function OfficeWorld({
   const managerName = MANAGER_NAMES[manager];
   const floors = stackFloors(agents);
   const floorGroups = floors.length
-    ? floors.map((key, index) => ({ key, y: index * FLOOR_GAP, agents: agents.filter((agent) => floorKey(agent.harness) === key) }))
+    ? floors.map((key, index) => ({ key, y: index * FLOOR_GAP, agents: agents.filter((agent) => floorKey(agent, floors.some((item) => item.includes("::"))) === key) }))
     : [{ key: "preview", y: 0, agents: [] as OfficeAgent[] }];
   return (
     <>
@@ -777,7 +780,12 @@ export default function OfficeWorld({
         </Billboard>}
       </>}
       {floor.key !== "preview" && <Billboard position={[7.2, 3.4, 4.2]}>
-        <Label text={floor.key.toUpperCase()} subtitle={`${floor.agents.length} sessions`} position={[0, 0, 0]} width={3.2} height={0.7} bg="#141c19" color="#e7f2ec" />
+        <Label text={floorHeading(floor.key).title} subtitle={(() => {
+          const active = floor.agents.filter((agent) => agent.status === "working").length;
+          const where = floorHeading(floor.key).project;
+          const count = active ? `${active} active · ${floor.agents.length} on this floor` : `${floor.agents.length} seated · quiet`;
+          return where ? `${where} · ${count}` : count;
+        })()} position={[0, 0, 0]} width={4.2} height={0.7} bg="#141c19" color="#e7f2ec" />
       </Billboard>}
       {floor.agents.map((a) => ({
             id: a.id,
