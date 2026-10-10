@@ -27,7 +27,7 @@ Completed: projects are connections. The office still opens on the folder it was
 
 Completed: a session whose last recorded turn ended in error is shown as `error`. The next Neatlogs span for that session sets `recovered` when the status leaves error or blocked. That is the before/after signal for a fix. A failed turn has not been observed in the two current Cursor sessions, so there is no failure trace to compare yet.
 
-Completed: Entire CLI 0.11.4 is installed and `entire enable --yes --agent cursor` configured this repository. `entire status` reports enabled on `main` for the Cursor agent. No checkpoint id exists yet, because Entire writes one when a commit is made.
+Completed: Entire CLI 0.11.4 is enabled for Cursor. Commit `1b80fff` produced checkpoint `01M4KNQHESBV27DJV6DWX2A9Q8`. It is local until `git push origin`.
 
 Completed: the floor agent reads who is seated and points at a failed session. Run recovery check sends an error span and then a recovered span for `office:recovery-drill`, and seats that agent. A character with a trace id links to `https://app.neatlogs.com/traces/{id}`. The business plan is in the office under Business plan.
 

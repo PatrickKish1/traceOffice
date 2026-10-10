@@ -1,7 +1,7 @@
 Entire CLI 0.11.4
 Enabled on branch main
 Agent: Cursor
-Checkpoints sync to: origin
-Settings: .entire/settings.json
-Hooks: .cursor/hooks.json
-Checkpoint id: none yet. Entire writes a checkpoint when the next commit is made.
+Checkpoint: 01M4KNQHESBV27DJV6DWX2A9Q8
+Commit: 1b80fff
+Message: Seat multiple projects and report each session to Neatlogs.
+Sync: one checkpoint is local until the next git push origin
