@@ -226,3 +226,7 @@ build fialed on vercel
 ---
 
 lets try to create more reaosnab;e alerts and evals like actuall prioduction or enterpise gfrase stuff and also get mnore logs and traces going
+
+---
+
+we need to explain how cfo.ai works like how did it shape the business plan we need to include a struiggle liek we striggled with something and after using cfo it was like a saving grace and we need to move to Entire and its usage, lets add description to repo if possible and i added enitre to this very repo so figure out what the hell we can do with it and see if its possible to get some url links to somehting so utlize it in the way its supposed to be used and then we add it to the toolset for the repo so when anyone clones it they can also get the feel if it and we should add it to the readme
