@@ -40,7 +40,7 @@ import { STATUS_LABELS, liveInteractions } from "./officeBehavior";
 import { floorAdvice } from "./floorAdvice";
 import { demoAgents } from "./demoFloor";
 import { BUSINESS_PLAN } from "./businessPlan";
-import { useRobotsSessions, type SessionProject } from "./integrations/codex/useRobotsSessions";
+import { useRobotsSessions, type LocalHarness, type LocalSource, type SessionProject } from "./integrations/codex/useRobotsSessions";
 import { useLiveRoom } from "./integrations/codex/useLiveRoom";
 import LiveRoomBar from "./components/import/LiveRoomBar";
 import Welcome from "./components/import/Welcome";
@@ -226,7 +226,7 @@ export default function App() {
   const severalProjects = new Set(roomAgents.map((agent) => agent.project).filter(Boolean)).size > 1;
   const rosterTitle = (agent: OfficeAgent) => severalProjects && agent.project ? agent.project : agentDisplayName(agent);
   const rosterDetail = (agent: OfficeAgent) => severalProjects ? `${agent.name} · ${behavior(agent)}` : behavior(agent);
-  function watchLocal(source: "grok" | "index" | "editors" = "grok", harness: "" | "cursor" | "claude" = "") {
+  function watchLocal(source: LocalSource = "grok", harness: LocalHarness = "") {
     setSelected(null);
     setWelcome(false);
     setPaused(false);

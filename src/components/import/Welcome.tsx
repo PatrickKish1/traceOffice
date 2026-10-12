@@ -5,13 +5,14 @@ import { parseOfficeSnapshot } from "../../snapshot";
 import { liveImportPrompt } from "../../integrations/codex/importPrompt";
 import { liveApiBase, type LiveRoomConnection } from "../../integrations/codex/useLiveRoom";
 import { AGENT_PLATFORMS, agentPlatform, type ConnectMode, type PlatformId } from "../../integrations/agentPlatforms";
+import type { LocalHarness, LocalSource } from "../../integrations/codex/useRobotsSessions";
 import "./welcome.css";
 
 export default function Welcome({ onImport, onExplore, onSocialImport, onWatchLocal, existingCount = 0, live }: {
   onImport: (agents: OfficeAgent[], interactions?: AgentInteraction[]) => void;
   onExplore: () => void;
   onSocialImport: () => void;
-  onWatchLocal?: (source: "grok" | "index" | "editors", harness?: "" | "cursor" | "claude") => void;
+  onWatchLocal?: (source: LocalSource, harness?: LocalHarness) => void;
   existingCount?: number;
   live: LiveRoomConnection;
 }) {
