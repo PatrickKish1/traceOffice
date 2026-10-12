@@ -189,3 +189,7 @@ can we have the chracters so something like give them a sense of life blinmking 
 ---
 
 at 1:52 it seems thats where talks of subscruption gets in but then the video ends at 2:20 as in like my dashbvoard recoding so in that time frame we can still talk about use cases of the product so that when we get to 2:21 then it starts talking about plans rifht now the plans start way earlier before another talk of plans at 2:29 whihc isnt really ideal
+
+---
+
+lets piush the code for the project make sure its not pushing the things that are not supposed to be pushed, also lets add a button to play a demo, this demo simulates how it works, it spins agents and aboiut 4 floors and we dont need anything to go to the neatlogs
