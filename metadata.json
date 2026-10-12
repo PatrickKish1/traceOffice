@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "01M4S63KAY2YGEJG9V14DTH3QP",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 7,
+  "files_touched": [
+    "README.md",
+    "evidence/cfo-business-plan.md",
+    "evidence/entire-graph.txt",
+    "package.json",
+    "scripts/entire-review.mjs",
+    "scripts/write-entire-checkpoints.mjs",
+    "server/neatlogs-report.mjs",
+    "src/App.tsx",
+    "src/Guide.tsx",
+    "src/entireCheckpoints.ts",
+    "src/entireLink.ts",
+    "src/style.css",
+    "tests/entire-link.test.mjs",
+    "tests/neatlogs-report.test.mjs"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 582767,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 10276864,
+    "output_tokens": 52880,
+    "api_call_count": 7
+  }
+}
