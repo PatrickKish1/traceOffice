@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { sessionsToReport } from "../server/neatlogs-report.mjs";
+import { operationLogs, sessionsToReport } from "../server/neatlogs-report.mjs";
 
 test("an existing session is reported once, including a quiet one", () => {
   const first = sessionsToReport(new Map(), [
@@ -14,4 +14,21 @@ test("an existing session is reported once, including a quiet one", () => {
     { id: "cursor:def", harness: "cursor", status: "idle", updatedAt: "2026-10-09T10:00:00.000Z", task: "Shell" },
   ]);
   assert.equal(second.report.length, 0);
+});
+
+test("span logs name the session and leave the prompt out", () => {
+  const lines = operationLogs({
+    harness: "claude",
+    status: "error",
+    project: "TraceOffice",
+    activity: "Edit ×1",
+    recovered: false,
+  });
+  assert.match(lines[0].message, /claude is error on TraceOffice/);
+  assert.equal(lines[0].level, "error");
+  assert.equal(lines[1].message, "Recorded activity: Edit ×1");
+  const recovered = operationLogs({ harness: "claude", status: "idle", project: "TraceOffice", recovered: true });
+  assert.equal(recovered.at(-1).message, "Status: recovered");
+  assert.match(lines[0].message, /Prompt text was not stored/);
+  assert.equal(JSON.stringify(lines).includes("/Users/"), false);
 });

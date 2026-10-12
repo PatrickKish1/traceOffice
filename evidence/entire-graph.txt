@@ -1,0 +1,229 @@
+# Entire graph proof
+# captured 2026-10-12T23:06:17Z
+# plugin v0.4.0, CLI 0.11.4, no_egress=true
+
+$ entire graph version
+v0.4.0
+
+$ entire graph doctor
+ENTIRE_CLI_VERSION=0.11.4
+ENTIRE_REPO_ROOT=/Volumes/PATRICK-512/PROJECTS/OPEN_AI/OpenAI-hack-
+ENTIRE_PLUGIN_DATA_DIR=/Users/patrickkish/.local/share/entire/plugins/data/graph
+no_egress=true
+plugin_data_dir=writable
+repo_root=/Volumes/PATRICK-512/PROJECTS/OPEN_AI/OpenAI-hack-
+
+$ entire graph search --query "where a local session is reported to Neatlogs and Jev decides the next action" --repo . --format text --top-k 1 --head
+1. src/jev/triage.ts:30-57 score=23.2584 symbol=jevTriageAgent kind=function focus=30 signals=path,body,symbol-name,constraint:entity,constraint:phrase,constraint:relationship,graph:callers,complete-symbol
+export function jevTriageAgent(agent: OfficeAgent, now = Date.now()): JevChoice {
+  const stale = ageMs(agent.updatedAt, now);
+  if (agent.status === "blocked") {
+    return { choice: "needs_human", confidence: 0.95, subtitle: ROUTE_SUBTITLE.needs_human };
+  }
+  if (agent.status === "error") {
+    return { choice: "failed", confidence: 0.92, subtitle: ROUTE_SUBTITLE.failed };
+  }
+  if (agent.status === "offline" || agent.disconnectedAt) {
+    return { choice: "failed", confidence: 0.88, subtitle: ROUTE_SUBTITLE.failed };
+  }
+  if (agent.health?.state === "error") {
+    return { choice: "failed", confidence: 0.9, subtitle: ROUTE_SUBTITLE.failed };
+  }
+  if (agent.health?.retrying) {
+    return { choice: "watch", confidence: 0.85, subtitle: "Retrying after a tool failure" };
+  }
+  if (agent.health?.state === "watch" || agent.status === "unknown") {
+    return { choice: "watch", confidence: 0.8, subtitle: ROUTE_SUBTITLE.watch };
+  }
+  if (agent.status === "working" && stale > STUCK_MS) {
+    return { choice: "stuck", confidence: 0.82, subtitle: ROUTE_SUBTITLE.stuck };
+  }
+  if (agent.status === "idle") {
+    return { choice: "ok", confidence: 0.75, subtitle: "Run finished — sofa duty" };
+  }
+  return { choice: "ok", confidence: 0.7, subtitle: ROUTE_SUBTITLE.ok };
+}
+
+VERIFY: none derivable (no build manifest found) - syntax-check the file you edited and stop.
+  targets src/jev/triage.ts (from no manifest, no test file, no single-file checker for this language) tier=none
+
+$ entire graph impact --repo . --symbol jevTriageAgent --format text --exclude-tests --limit 8
+Index: cache-miss (1016ms) | Query: 0ms | Total: 1016ms
+Impact: jevTriageAgent (src/jev/triage.ts:30) def=30 span=30-57 [function]
+Blast radius: 2 callers (2 direct, 0 transitive), 1 callee, 4 type consumers, 4 data flows, 0 co-change files, 0 siblings.
+Callers (2 direct, 0 transitive; who breaks if behavior changes):
+- Jev (src/components/OfficeWorld.tsx:546, def :518)
+- jevAtShowcaseDesk (src/jev/triage.ts:82, def :73)
+Callees (1; what it depends on):
+- ageMs (src/jev/triage.ts:23)
+Type consumers (0 in, 4 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- -> JevChoice (src/jev/triage.ts:7) [RETURNS_TYPE]
+- -> JevChoice (src/jev/triage.ts:7) [USES_TYPE]
+- -> OfficeAgent (src/types.ts:27) [PARAM_TYPE]
+- -> OfficeAgent (src/types.ts:27) [USES_TYPE]
+Data flows (1 in, 3 out):
+- -> Jev (src/components/OfficeWorld.tsx:518)
+- -> ageMs (src/jev/triage.ts:23)
+- <- jevAtShowcaseDesk (src/jev/triage.ts:73)
+- -> jevAtShowcaseDesk (src/jev/triage.ts:73)
+Co-change coupling (0; files that historically change with src/jev/triage.ts):
+- none
+Same-container siblings (0):
+- none
+
+$ entire graph checkpoint 01M4KNQHESBV27DJV6DWX2A9Q8
+Semantic changes e46aa1f81f028b63224184cef35fe8e540832f6f..1b80fff3057ef2a7f5d408953d495d322582447f
+
+.cursor/hooks.json (JSON)
+  + section hooks added
+  + section beforeSubmitPrompt added
+  + section command added
+  + section preCompact added
+  + section sessionEnd added
+  + section sessionStart added
+  + section stop added
+  + section subagentStart added
+  + section subagentStop added
+  + section version added
+
+.cursor/mcp.json (JSON)
+  + section mcpServers added
+  + section cfoai added
+  + section url added
+
+.entire/.gitignore (Git Ignore)
+  + document .gitignore added
+
+.entire/settings.json (JSON)
+  + section enabled added
+  + section checkpoints added
+  + section primary added
+  + section type added
+
+README.md (Markdown)
+  + code_fence code_fence_5_sh added
+  + code_fence code_fence_6_text added
+
+evidence/cfo-business-plan.md (Markdown)
+  + section TraceOffice-business-plan added
+
+evidence/recovery-drill.json (JSON)
+  + section sessionId added
+  + section workflow added
+  + section failedAt added
+  + section recoveredAt added
+  + section failedTrace added
+  + section recoveredTrace added
+
+hackathon.md (Markdown)
+  + section neatHack-build-log added
+  + section Project added
+  + section Team added
+  + section Stack added
+  + section Build-log added
+  + section 2026-10-10 added
+  + section Demo added
+  + section Known-limitations added
+  + section Submission added
+
+src/App.tsx (TypeScript)
+  ~ function App body changed (0 dependents)
+  + function runRecovery added
+
+src/Guide.tsx (TypeScript)
+  ~ function Guide body changed (1 dependent)
+
+src/businessPlan.ts (TypeScript)
+  + variable BUSINESS_PLAN added
+
+src/components/OfficeWorld.tsx (TypeScript)
+  ~ function Walker body changed (1 dependent)
+  ~ function Jev body changed (5 dependents)
+  ~ function OfficeWorld body changed (1 dependent)
+
+src/floorAdvice.ts (TypeScript)
+  + interface FloorAdvice added
+  + field FloorAdvice.title added
+  + field FloorAdvice.detail added
+  + field FloorAdvice.agentId added
+  + field FloorAdvice.action added
+  + function floorAdvice added
+
+src/integrations/codex/useRobotsSessions.ts (TypeScript)
+  ~ type LocalSource signature changed (6 dependents)
+  + interface SessionProject added
+  + field SessionProject.id added
+  + field SessionProject.label added
+  + field SessionProject.sessions added
+  + field SessionProject.current added
+  + field SessionProject.connected added
+  + field SessionProject.platforms added
+  ~ function feedLabel body changed (2 dependents)
+  + function isSource added
+  ~ function readFeeds body changed (1 dependent)
+  + function readProjectIds added
+  ~ function useRobotsSessions body changed (1 dependent)
+  ~ function publish body changed (2 dependents)
+  ~ function refresh body changed (3 dependents)
+
+src/officeBehavior.ts (TypeScript)
+  ~ function floorKey signature changed (3 dependents)
+  + function floorHeading added
+  ~ function stackFloors signature changed (2 dependents)
+
+src/style.css (CSS)
+  + selector floor-agent added
+  + selector plan-sheet added
+  + selector project-picks added
+
+src/types.ts (TypeScript)
+  ~ interface OfficeAgent body changed (28 dependents)
+  + field OfficeAgent.project added
+  + field OfficeAgent.traceUrl added
+
+Warnings
+  ! W_UNSUPPORTED_FILE evidence/entire-status.txt
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE server/codex-sessions.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    base and head versions have no supported parser
+  ! W_UNSUPPORTED_FILE server/discover-sessions.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE server/editor-ops.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE server/editor-sessions.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    base and head versions have no supported parser
+  ! W_UNSUPPORTED_FILE server/floor-agent.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE server/neatlogs-report.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE server/project-catalog.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE server/trace-links.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE tests/editor-ops.test.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE tests/floor-advice.test.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE tests/neatlogs-report.test.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE tests/office-behavior.test.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    base and head versions have no supported parser
+  ! W_UNSUPPORTED_FILE tests/project-catalog.test.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser
+  ! W_UNSUPPORTED_FILE tests/trace-links.test.mjs
+    file skipped; no parser for this file type, so its changes are not analyzed
+    head version has no supported parser

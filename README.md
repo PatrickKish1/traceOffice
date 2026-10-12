@@ -60,6 +60,8 @@ Neatlogs is the trace store. It is not this office, and connecting Cursor inside
 
 The floor today is driven by local session files: Cursor, Claude Code, Codex, and Grok. Each platform is its own stacked floor. A file touched in the last five minutes sits and works. Click a character for the status that file reported.
 
+That file, or the span Neatlogs stored for the same session, is what a developer hands to the next step. The office posts the operation. Jev reviews the seated session and names the action: the desk is fine, keep watching, the run is stuck, it failed, or a person has to stand there. The floor agent says the same thing in one line and points at the trace. Those routes are the automation. A failed run and a recovered run already have alerts. The product is that pipeline. The hackathon work was building it, so a developer can use it when they are away from the machine.
+
 Opening the office discovers Cursor, Claude Code, Codex, and Grok sessions for the folder you started it in, including ones that are quiet. Other local projects appear as connections in the sidebar. Each platform is a floor, and a second project gets its own floors. A spawned subagent is a smaller helper on that floor. The first time a session is seen, and again when its status or tool list changes, it is sent to Neatlogs as a workflow span named `claude-session` or `cursor-session`. The span carries the session UUID, the platform, the status, and tool names with counts. It does not carry the chat. Set `NEATLOGS_API_KEY` from the project’s Settings → API Keys and restart `pnpm dev`. The dashboard shows those spans under the workflow `trace-office`.
 
 Tool-by-tool Claude traces (each prompt, Read, Edit, and Bash) come from Neatlogs’ own Claude Code hooks, which use that same session UUID:
@@ -72,27 +74,23 @@ Restart Claude Code after that. The office still only needs the session file tim
 
 ## cfo.ai
 
-cfo.ai is where the price, the costs, and the runway belong. Cursor can reach it through the MCP server at `https://api.cfo.ai/mcp`, which is already listed in `.cursor/mcp.json`. The sheet in `evidence/cfo-business-plan.md` is the plan prepared for that workspace. It is not a signed-in export, and the in-app Business plan panel shows the same assumptions.
-
-The struggle was treating $1,960 of revenue as a business. Forty teams at $49 a month produce that number. Neatlogs, hosting, and support then take it down to $1,210, and one founder still costs $4,000 a month. The base case does not cover the founder. Putting those facts in one cfo.ai-shaped sheet is what made the miss obvious: one seat price, Neatlogs left as the usage bill, and a second case of 120 teams that covers the founder with about $180 left. Nobody is hired until that growth case is real.
+cfo.ai is what put the price on one page with the costs. Forty teams at $49 looked like a business because the revenue was $1,960. It was not. Neatlogs, hosting, and support take that down to $1,210, and a founder still costs $4,000 a month. Writing those same facts in the cfo.ai shape — one seat price, Neatlogs left as the usage bill, and a second case of 120 teams — is what made the miss obvious. One hundred twenty teams cover the founder with about $180 left. Nobody is hired on the base case. The MCP server is `https://api.cfo.ai/mcp`. The rows in `evidence/cfo-business-plan.md` are the plan prepared for that workspace. They are not a signed-in export. The in-app Business plan panel shows the same assumptions.
 
 ## Entire
 
-Entire records the agent session behind a commit and keeps that session with the commit. This repository is already enabled, so a clone gets the same setup:
+We used Entire to keep the agent session on the commit that came out of it. `.entire/settings.json` stores a checkpoint on each commit, and `.cursor/hooks.json` calls the Entire CLI from Cursor. The checkpoint id is the `Entire-Checkpoint` line on the commit. Push sent those refs to origin. When we needed the work behind a change, we opened that commit on Entire with the full SHA and read the session that wrote it. The office footer and `/guides` open the same pages. `npm run entire:status` shows this checkout is enabled.
 
-- `.entire/settings.json` stores checkpoints as git refs and syncs them to `origin`.
-- `.cursor/hooks.json` calls the Entire CLI from Cursor. If the CLI is not installed, the hooks do nothing and the editor still works.
+Checkpoints are the progress log. The first one, `01M4KNQHESBV27DJV6DWX2A9Q8`, is the decision to give each project its own floor and to report each session as an operation, with the prompt left out. The next one, `01M4KNR8EBQXGDD8W7Z8QJ3AJ7`, is the decision to write that checkpoint id on the commit so the session can be opened later. `01M4RV6G5EWDV8875WCXRZEFXQ` keeps a floor to the four newest sessions and adds a demo that stays in the browser. `01M4RVJ3KDT91TGRVXDMNTN8DR` accepts the discover source so the office typechecks. `01M4RXSFK8MB9T0CJPZM19NY4D` records the price correction: $1,960 of revenue does not pay a founder. Opening that last commit on Entire shows the session that wrote it, Multi-Agent Visualization for Neatlogs. `npm run entire:progress` prints this list from the trailers.
 
-Install the CLI once:
+`entire graph search` landed on `jevTriageAgent`. `entire graph impact` showed a change there only moves Jev and the desk hand-off, so the route was safe to edit. The same check on the reporting checkpoint caught the wide edit: `OfficeAgent` now carries a project and a trace link across 28 dependents. The docs checkpoint had no code dependents. The command output is in `evidence/entire-graph.txt`.
 
-```sh
-brew install entireio/tap/entire
-```
+`npm run entire:risk` repeats that check on the latest checkpoint and on `jevTriageAgent`. `npm run entire:progress` prints the decision stored on each one. The office footer opens the session for that commit. A clone runs both after `entire plugin install graph`.
 
-On Linux, `curl -fsSL https://entire.io/install.sh | bash`. Then work in Cursor as usual. A checkpoint is written when you commit, not before. The commit message gains a trailer, `Entire-Checkpoint: <id>`. On `git push`, those checkpoint refs go to origin with the branch. `npm run entire:status` shows whether this checkout is enabled.
+A clone gets the same hooks. Install the CLI once with `brew install entireio/tap/entire` (on Linux, `curl -fsSL https://entire.io/install.sh | bash`). The hooks do nothing if the CLI is missing, and the editor still works.
 
-Open a checkpoint on Entire. The commit SHA has to be the full one:
+The commit SHA has to be the full one:
 
+- [cfo.ai and Entire in the clone](https://entire.io/gh/PatrickKish1/traceOffice/commit/8b0f73e6b28ac285a24d937919a7df6144f71b48) — `01M4RXSFK8MB9T0CJPZM19NY4D`
 - [Typecheck fix](https://entire.io/gh/PatrickKish1/traceOffice/commit/34318789208ef384f85ea584035cc35003aab141) — `01M4RVJ3KDT91TGRVXDMNTN8DR`
 - [Demo and recent seats](https://entire.io/gh/PatrickKish1/traceOffice/commit/348007522fda654609549e5bc574af8a801ad138) — `01M4RV6G5EWDV8875WCXRZEFXQ`
 - [Neatlogs session reporting](https://entire.io/gh/PatrickKish1/traceOffice/commit/1b80fff3057ef2a7f5d408953d495d322582447f) — `01M4KNQHESBV27DJV6DWX2A9Q8`

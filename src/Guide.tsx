@@ -1,3 +1,6 @@
+import { ENTIRE_CHECKPOINTS, ENTIRE_REPO } from "./entireCheckpoints";
+import { entireCommitUrl } from "./entireLink";
+
 export default function Guide() {
   return <article className="guide">
     <a className="brand" href="/" aria-label="TraceOffice home">trace<span className="wordmark-dot">office</span></a>
@@ -38,6 +41,7 @@ export default function Guide() {
     <section>
       <h2>Neatlogs</h2>
       <p>TraceOffice is the office. Neatlogs is the record. The floor shows who is seated. Neatlogs stores a span for each discovered session: the session UUID, the platform, whether it is working or quiet, and the tool names that session used. Prompt text is not sent.</p>
+      <p>A developer uses that span, or the session file the office is already watching. Jev reviews the seated session and the label is the next action: fine, watch, stuck, failed, or a person at the desk. The floor agent points at the trace. The alerts for a failed run and a recovered run are the automation that follows.</p>
       <p>Three credentials live in <code>.env</code>, and they are not interchangeable. Restart <code>pnpm dev</code> after changing them.</p>
       <ul>
         <li><code>NEATLOGS_API_KEY</code> is the project ingest key from Settings → API Keys. The office uses it to send a session span.</li>
@@ -54,8 +58,20 @@ export default function Guide() {
     <section>
       <h2>Detections, alerts, and evaluations</h2>
       <p>Detections badge a span after it arrives. Adding a suggestion turns that rule on. The four suggestions from the TraceOffice traces are on: Dynamic Tool Usage Tracker, Recovery Status Monitor, Shared Project Tool Error, and Missing File Error Detector. The two negative ones are the ones that mark a failed tool or a missing file. Leave them on. They are what an alert can point at.</p>
-      <p>An alert is a separate rule that notifies you when a detection fires. The service token created two, both warning and per-event, with email and Slack left off: <b>Shared project tool error</b> and <b>Missing file in project</b>. They show under Settings → Alerts. An older rule, Immediate Execution Failure Alert, already watches Execution Failed. Creating a rule through <code>POST /api/v1/public/alert-rules</code> turns it on. There is no draft state, so a person still has to disable a rule they do not want live.</p>
-      <p>Evaluations are empty on this project. The service token can read <code>GET /api/v1/public/evaluations</code> and <code>GET /api/v1/public/evaluators</code>. An evaluator has to be created in Neatlogs before a trace can be scored.</p>
+      <p>An alert notifies you when a detection fires. The live rules, with email and Slack left off, are <b>Run ended in error</b>, <b>Shared workspace tool failure</b>, <b>Workspace artifact missing</b>, <b>Session restored after failure</b>, <b>Dynamic tool invocation</b>, <b>Model latency over budget</b>, and <b>Model spend over budget</b>. They show under Settings → Alerts. Creating a rule through <code>POST /api/v1/public/alert-rules</code> turns it on. There is no draft state, so a person still has to disable a rule they do not want live.</p>
+      <p>Reviews stay in draft until a person launches them. <b>Incident recovery review</b> asks whether the session recovered, whether the failure stayed in one session, and whether on-call should be paged. <b>Trace handling review</b> checks that the span names the session and leaves the prompt out. The service token can read <code>GET /api/v1/public/evaluations</code> and <code>GET /api/v1/public/evaluators</code>. Launching a review has been refused for this service account, so a person still starts it in Neatlogs.</p>
+    </section>
+
+    <section>
+      <h2>Entire</h2>
+      <p>We used Entire to keep the agent session on the commit that produced it. Each commit stored a checkpoint, and the id is the <code>Entire-Checkpoint</code> line on that commit. When the work behind a change was needed, we opened the commit on Entire with the full SHA and read the session that wrote it. A short SHA is rejected.</p>
+      <ul>
+        {ENTIRE_CHECKPOINTS.map((checkpoint) => {
+          const href = entireCommitUrl(ENTIRE_REPO.owner, ENTIRE_REPO.name, checkpoint.sha);
+          return <li key={checkpoint.id}><a href={href ?? undefined} target="_blank" rel="noreferrer">{checkpoint.subject}</a> <code>{checkpoint.id}</code></li>;
+        })}
+      </ul>
+      <p>On a clone, <code>brew install entireio/tap/entire</code> then <code>npm run entire:status</code>. <code>entire checkpoint explain &lt;id&gt;</code> reads the session in the terminal.</p>
     </section>
 
     <section>

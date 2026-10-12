@@ -27,6 +27,17 @@ function ingestKey() {
   return "";
 }
 
+/** Operational lines for a span. Prompts, paths, and tool arguments stay out. */
+export function operationLogs(session) {
+  const lines = [{
+    level: session.status === "error" || session.status === "blocked" ? "error" : "info",
+    message: `Session ${session.harness} is ${session.status} on ${session.project ?? "unassigned"}. Prompt text was not stored.`,
+  }];
+  if (session.activity) lines.push({ level: "info", message: `Recorded activity: ${session.activity}` });
+  if (session.recovered) lines.push({ level: "info", message: "Status: recovered" });
+  return lines;
+}
+
 /** Which discovered sessions should become a Neatlogs span. Chat text is never included. */
 export function sessionsToReport(seen, agents) {
   const next = new Map(seen);
@@ -73,7 +84,7 @@ export function reportOfficeSessions(agents) {
 }
 
 async function sendSpans(apiKey, report) {
-  const { doctorCapturedLocalV2, flush, init, shutdown, span } = await import("neatlogs");
+  const { doctorCapturedLocalV2, flush, init, log, shutdown, span } = await import("neatlogs");
   await init({
     apiKey,
     endpoint: process.env.NEATLOGS_ENDPOINT || "https://ingest.neatlogs.com",
@@ -81,15 +92,18 @@ async function sendSpans(apiKey, report) {
   });
   try {
     for (const session of report) {
-      const run = span({ kind: "WORKFLOW", name: `${session.harness}-session` }, async () => ({
-        sessionId: session.id,
-        harness: session.harness,
-        project: session.project,
-        status: session.status,
-        updatedAt: session.updatedAt,
-        activity: session.activity,
-        recovered: session.recovered,
-      }));
+      const run = span({ kind: "WORKFLOW", name: `${session.harness}-session` }, async () => {
+        for (const entry of operationLogs(session)) log(entry.message, { level: entry.level });
+        return {
+          sessionId: session.id,
+          harness: session.harness,
+          project: session.project,
+          status: session.status,
+          updatedAt: session.updatedAt,
+          activity: session.activity,
+          recovered: session.recovered,
+        };
+      });
       await run();
     }
     await flush();

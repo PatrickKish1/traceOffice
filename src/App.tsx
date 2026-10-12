@@ -39,6 +39,8 @@ import {
 import { STATUS_LABELS, liveInteractions } from "./officeBehavior";
 import { floorAdvice } from "./floorAdvice";
 import { demoAgents } from "./demoFloor";
+import { ENTIRE_CHECKPOINTS, ENTIRE_REPO } from "./entireCheckpoints";
+import { entireCommitUrl } from "./entireLink";
 import { BUSINESS_PLAN } from "./businessPlan";
 import { useRobotsSessions, type LocalHarness, type LocalSource, type SessionProject } from "./integrations/codex/useRobotsSessions";
 import { useLiveRoom } from "./integrations/codex/useLiveRoom";
@@ -613,6 +615,11 @@ export default function App() {
                 ? `${roomAgents.length} sessions · ${local.state} · checked ${local.observedAt ? new Date(local.observedAt).toLocaleTimeString() : "—"}`
                 : `${roomAgents.length} imported agents · snapshot mode`}
         </span>
+        {ENTIRE_CHECKPOINTS[0] && entireCommitUrl(ENTIRE_REPO.owner, ENTIRE_REPO.name, ENTIRE_CHECKPOINTS[0].sha) && (
+          <a href={entireCommitUrl(ENTIRE_REPO.owner, ENTIRE_REPO.name, ENTIRE_CHECKPOINTS[0].sha) ?? undefined} target="_blank" rel="noreferrer">
+            Open this commit on Entire
+          </a>
+        )}
       </footer>
       {!guest && studioTab && <RoomStudio key={studioTab} initialTab={studioTab} profile={profile} onProfile={setProfile} books={books} onBooks={setBooks} projects={projects} onProjects={setProjects} stats={stats} onStats={setStats} share={share} onShare={setShare} agents={roomAgents} onClose={() => setStudioTab(null)} />}
       {planOpen && !guest && (

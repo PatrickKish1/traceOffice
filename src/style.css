@@ -634,6 +634,11 @@ footer > span {
   background: #3ecf8e;
   border-radius: 50%;
 }
+footer a {
+  color: #3ecf8e;
+  text-decoration: none;
+}
+footer a:hover { text-decoration: underline; }
 .footer-separator {
   padding: 0 9px;
   color: #6d8578;

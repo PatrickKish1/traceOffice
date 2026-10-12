@@ -1,8 +1,6 @@
 # TraceOffice business plan
 
-cfo.ai is the workspace for a price, the costs under it, and whether the founder can live on what is left. The MCP server is `https://api.cfo.ai/mcp` in `.cursor/mcp.json`. These rows are the plan prepared for that workspace. They are not a signed-in export.
-
-The struggle was the first cut of the price. A hosted room at $49, Neatlogs as a usage bill, Cloudflare for the live room, and one founder at $4,000 a month were all true at the same time. Forty teams still looked like a business, because the revenue was $1,960. It was not. After Neatlogs, hosting, and support, $1,210 was left, and the founder was still short. Writing the same facts in the cfo.ai shape — one price, two cases, gross profit against the founder cost — is what made that obvious. One hundred twenty teams cover the founder with about $180 left. Nobody is hired on the base case. Neatlogs stays the usage bill.
+cfo.ai is what put the price on one page with the costs. Forty teams at $49 looked like a business because the revenue was $1,960. It was not. Neatlogs, hosting, and support take that down to $1,210, and a founder still costs $4,000 a month. Writing those same facts in the cfo.ai shape — one seat price, Neatlogs left as the usage bill, and a second case of 120 teams — is what made the miss obvious. One hundred twenty teams cover the founder with about $180 left. Nobody is hired on the base case. The MCP server is `https://api.cfo.ai/mcp`. These rows are the plan prepared for that workspace. They are not a signed-in export.
 
 TraceOffice is free while it runs on the developer's machine. The paid offer is a hosted control room: one office for a team's coding agents, with Neatlogs as the trace store.
 
