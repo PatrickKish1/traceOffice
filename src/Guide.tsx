@@ -10,7 +10,7 @@ export default function Guide() {
       <ol>
         <li><b>Open the room.</b> http://127.0.0.1:3000 is enough. No key is required.</li>
         <li><b>Choose the people.</b> Room studio → Characters. Pick a character pack and a manager, then Apply to room. Trace, Signal, Patch, Relay, and Jev all swap looks together; names stay the same.</li>
-        <li><b>Bring real sessions.</b> The office discovers Cursor, Claude Code, Codex, and Grok by itself when you open it on this computer. A session is seated when the file exists, even if it is quiet. A file touched in the last five minutes sits and works. Each platform gets its own floor. The preview crew steps aside while any session is seated.</li>
+        <li><b>Bring real sessions.</b> The office discovers Cursor, Claude Code, Codex, and Grok by itself when you open it on this computer. Each connected project seats its four most recent sessions, even if they are quiet. A file touched in the last five minutes sits and works. Each project and platform gets its own floor. The preview crew steps aside while any session is seated.</li>
       </ol>
     </section>
 
@@ -29,19 +29,33 @@ export default function Guide() {
 
     <section>
       <h2>Discovery</h2>
-      <p>Opening the office starts a local discovery pass for the folder you started it in. Quiet sessions stay on the floor. A different platform adds another floor. The sidebar also lists other Cursor and Claude projects on this computer. Press one to connect it, the same way you connect a platform. Up to four projects can be open. Each project keeps its own platform floors, so Cursor in one repo is not the Cursor floor of another.</p>
-      <p>A nested session file, or a Task / Agent tool that names a <code>subagent_type</code>, shows up as a smaller helper on that same floor. The helper is the spawned worker. The parent stays the session you prompted.</p>
+      <p>Opening the office starts a local discovery pass for the folder you started it in. The four newest sessions are seated. Older ones stay in the count and do not get a desk. A different project, or a different platform among those four, adds another floor, and the camera pulls back to show it. The local-feed card lists projects you can connect. When more than one platform has sessions, platform buttons filter that list. Four projects stay in the card. Show more opens the rest. Up to four projects can be seated. Each project keeps its own platform floors, labeled with the project name and the platform.</p>
+      <p>The folder name can be replaced for the floor and for Neatlogs without renaming the directory. Put the automatic label and the name you want in <code>.trace-office/names.json</code>. That file is gitignored.</p>
+      <p>A nested session file stays off this floor. The four seats are the sessions you prompted, not the workers they spawned.</p>
       <p>Prompt in Cursor or Claude Code, in this project. Within a few seconds the office seats that session. This room does not send the prompt for you. Cursor and Claude Code still own the conversation. Disconnect local sessions in the sidebar if you want the preview crew back.</p>
     </section>
 
     <section>
       <h2>Neatlogs</h2>
       <p>TraceOffice is the office. Neatlogs is the record. The floor shows who is seated. Neatlogs stores a span for each discovered session: the session UUID, the platform, whether it is working or quiet, and the tool names that session used. Prompt text is not sent.</p>
-      <p>Put the project key in <code>NEATLOGS_API_KEY</code>. Create it in the Neatlogs project under Settings → API Keys. Restart <code>pnpm dev</code> after changing it. The first time discovery sees a session, that span is sent. Later polls send again only when the status or the tool list changes.</p>
+      <p>Three credentials live in <code>.env</code>, and they are not interchangeable. Restart <code>pnpm dev</code> after changing them.</p>
+      <ul>
+        <li><code>NEATLOGS_API_KEY</code> is the project ingest key from Settings → API Keys. The office uses it to send a session span.</li>
+        <li><code>NEATLOGS_TOKEN</code> is the HTTP write key. It can post a trace. It cannot list detections, create alerts, or read evaluations.</li>
+        <li><code>NEATLOGS_SERVICE_TOKEN</code> is the service account. It is the key for the public API: detections, alert rules, and evaluations. Send it as <code>Authorization: Bearer</code> with <code>x-project-id</code> set to <code>NEATLOGS_PROJECT_ID</code>.</li>
+      </ul>
+      <p>The first time discovery sees a session, that span is sent. Later polls send again only when the status or the tool list changes.</p>
       <p>Claude Code can also report each turn and each tool by itself. That uses the same session UUID Claude prints for <code>--resume</code>. From a terminal:</p>
       <pre><code>npx @neatlogs/claude-code setup --global --api-key "$NEATLOGS_API_KEY"</code></pre>
       <p>Restart Claude Code after that command. The hooks write the key to <code>~/.config/neatlogs/config.json</code> and register themselves in <code>~/.claude/settings.json</code>. Those traces are the full tool tree. The office still only needs the session file to show who is on the Claude floor.</p>
       <p>Cursor does not emit those hooks for a local chat. Connecting Cursor on the Neatlogs coding-agents page starts a Neatlogs cloud agent. It does not stream this IDE session. Discovery is the Cursor path: the transcript UUID, plus tool names and counts from that file, show up as a <code>cursor-session</code> workflow. Cloud in Import agents opens <a href="https://app.neatlogs.com/settings/account/coding-agents">Neatlogs coding agents</a> for the cloud approval. That approval does not copy cloud agents onto the floor.</p>
+    </section>
+
+    <section>
+      <h2>Detections, alerts, and evaluations</h2>
+      <p>Detections badge a span after it arrives. Adding a suggestion turns that rule on. The four suggestions from the TraceOffice traces are on: Dynamic Tool Usage Tracker, Recovery Status Monitor, Shared Project Tool Error, and Missing File Error Detector. The two negative ones are the ones that mark a failed tool or a missing file. Leave them on. They are what an alert can point at.</p>
+      <p>An alert is a separate rule that notifies you when a detection fires. The service token created two, both warning and per-event, with email and Slack left off: <b>Shared project tool error</b> and <b>Missing file in project</b>. They show under Settings → Alerts. An older rule, Immediate Execution Failure Alert, already watches Execution Failed. Creating a rule through <code>POST /api/v1/public/alert-rules</code> turns it on. There is no draft state, so a person still has to disable a rule they do not want live.</p>
+      <p>Evaluations are empty on this project. The service token can read <code>GET /api/v1/public/evaluations</code> and <code>GET /api/v1/public/evaluators</code>. An evaluator has to be created in Neatlogs before a trace can be scored.</p>
     </section>
 
     <section>

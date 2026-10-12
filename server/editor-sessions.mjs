@@ -27,7 +27,7 @@ export function projectDirMatches(dirName, project) {
 }
 
 async function collectJsonl(dir, depth, out) {
-  if (depth > 3 || out.length > 80) return;
+  if (depth > 3 || out.length > 400) return;
   let entries;
   try {
     entries = await readdir(dir, { withFileTypes: true });
@@ -104,6 +104,7 @@ export async function readEditorSessions({
   project = process.env.DOTS_SESSION_CWD ?? process.env.TRACE_SESSION_CWD ?? process.cwd(),
   now = Date.now(),
   harness = null,
+  seatLimit = 4,
   cursorHome = path.join(homedir(), ".cursor", "projects"),
   claudeHome = path.join(homedir(), ".claude", "projects"),
 } = {}) {
@@ -120,20 +121,28 @@ export async function readEditorSessions({
       await collectJsonl(dir, 0, files);
     }
   }
-  const found = [];
+  const ranked = [];
   for (const file of files) {
-    const harnessName = file.includes(`${path.sep}.cursor${path.sep}`) ? "cursor" : "claude";
+    const identity = sessionIdentity(file, path.sep);
+    if (!identity || identity.parentId) continue;
     let info;
     try {
       info = await stat(file);
     } catch {
       continue;
     }
+    ranked.push({ file, info });
+  }
+  ranked.sort((a, b) => b.info.mtimeMs - a.info.mtimeMs);
+  const found = [];
+  for (const { file, info } of ranked) {
+    const harnessName = file.includes(`${path.sep}.cursor${path.sep}`) ? "cursor" : "claude";
     const summary = await summarizeFile(file, info.size);
     const agent = agentFromFile(harnessName, file, info, now, summary);
-    if (agent) found.push(agent);
+    if (!agent || agent.parentId) continue;
+    found.push(agent);
+    if (found.length >= seatLimit) break;
   }
-  found.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
   const unique = [];
   const seen = new Set();
   for (const agent of found) {
@@ -142,14 +151,14 @@ export async function readEditorSessions({
     const { summary, parentId, ...publicAgent } = agent;
     unique.push(publicAgent);
     if (parentId) unique.at(-1).parentId = parentId;
+    if (unique.length >= seatLimit) continue;
     for (const helper of helperAgents(publicAgent, summary)) {
-      if (seen.has(helper.id)) continue;
+      if (seen.has(helper.id) || unique.length >= seatLimit) continue;
       seen.add(helper.id);
       unique.push({ ...helper, parentId: publicAgent.id });
     }
-    if (unique.length >= 40) break;
   }
-  const published = unique.slice(0, 40).map(({ parentId, ...agent }) => agent);
+  const published = unique.slice(0, seatLimit).map(({ parentId, ...agent }) => agent);
   const ids = new Set(published.map((agent) => agent.id));
   const interactions = unique
     .filter((agent) => agent.parentId && ids.has(agent.id) && ids.has(agent.parentId))

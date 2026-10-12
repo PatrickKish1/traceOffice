@@ -1,9 +1,35 @@
+import { readFileSync } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 import { projectDirMatches } from "./editor-sessions.mjs";
 
 const SLUG = /^[A-Za-z0-9._-]{1,180}$/;
+const NAMES_FILE = new URL("../.trace-office/names.json", import.meta.url);
+
+/** Local display names. The file is gitignored. Keys are the automatic folder labels. */
+export function readDisplayNames(file = NAMES_FILE) {
+  try {
+    const data = JSON.parse(readFileSync(file, "utf8"));
+    if (!data || typeof data !== "object" || Array.isArray(data)) return {};
+    return data;
+  } catch {
+    return {};
+  }
+}
+
+export function applyDisplayName(label, names = readDisplayNames(), slug = "") {
+  const keys = [label, slug].flatMap((value) => {
+    const text = String(value ?? "");
+    const trimmed = text.replace(/^-+/, "").replace(/-+$/, "");
+    return trimmed === text ? [text] : [text, trimmed];
+  }).filter(Boolean);
+  for (const key of keys) {
+    const hit = names[key];
+    if (typeof hit === "string" && hit.trim()) return hit.trim().slice(0, 80);
+  }
+  return String(label);
+}
 
 export function projectLabel(slug) {
   const parts = String(slug).replace(/^-+/, "").split("-").filter(Boolean);
@@ -67,6 +93,7 @@ export async function listSessionProjects({
   cursorHome = path.join(homedir(), ".cursor", "projects"),
   claudeHome = path.join(homedir(), ".claude", "projects"),
 } = {}) {
+  const names = readDisplayNames();
   const [cursor, claude] = await Promise.all([
     roots(cursorHome, (dir) => path.join(dir, "agent-transcripts")),
     roots(claudeHome, (dir) => dir),
@@ -82,7 +109,7 @@ export async function listSessionProjects({
     if (!existing) {
       merged.set(key, {
         id: source.id.replace(/^-+/, "") === key ? key : source.id,
-        label: projectLabel(key),
+        label: applyDisplayName(projectLabel(key), names, key),
         sessions: source.sessions,
         active: 0,
         updatedAt: source.updatedAt,

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { roomCameraFrame } from "../src/components/office/camera.ts";
-import { officeLayout } from "../src/officeBehavior.ts";
+import { FLOOR_GAP, officeLayout } from "../src/officeBehavior.ts";
 
 test("overview and top view keep the room inside desktop and phone viewports", () => {
   for (const total of [0, 12, 20, 50]) {
@@ -26,4 +26,15 @@ test("overview and top view keep the room inside desktop and phone viewports", (
       }
     }
   }
+});
+
+test("a second floor stays inside the overview", () => {
+  const layout = officeLayout(8);
+  const frame = roomCameraFrame(8, 1.5, 38, "overview", 2);
+  const camera = new THREE.PerspectiveCamera(38, 1.5, 0.1, 1000);
+  camera.position.copy(frame.position);
+  camera.lookAt(frame.target);
+  camera.updateMatrixWorld();
+  const top = new THREE.Vector3(layout.x, FLOOR_GAP + 4.2, layout.z).project(camera);
+  assert.ok(Math.abs(top.x) < 1 && Math.abs(top.y) < 1 && top.z < 1, "the upper floor sign must be in frame");
 });

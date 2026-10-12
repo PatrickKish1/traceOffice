@@ -201,12 +201,12 @@ function Room({ night, profile, total }: { night: boolean; profile: RoomProfile;
       <Box
         position={[layout.x, -0.32, layout.z]}
         size={[layout.width, 0.6, layout.depth]}
-        color={night ? "#121816" : palette.lounge}
+        color={night ? "#121816" : "#efeae2"}
       />
       <Box
         position={[layout.x, 0.015, layout.z]}
         size={[layout.width - 0.3, 0.06, layout.depth - 0.3]}
-        color={night ? "#1a2420" : palette.floor}
+        color={night ? "#1a2420" : "#fbfaf6"}
       />
       {Array.from({ length: Math.floor(layout.width) }, (_, i) => (
         <mesh
@@ -215,18 +215,18 @@ function Room({ night, profile, total }: { night: boolean; profile: RoomProfile;
           position={[layout.x - layout.width / 2 + 0.7 + i, 0.052, layout.z]}
         >
           <planeGeometry args={[0.016, layout.depth - 0.5]} />
-          <meshStandardMaterial color={night ? "#24302b" : palette.wall} />
+          <meshStandardMaterial color={night ? "#24302b" : "#e4dfd4"} />
         </mesh>
       ))}
       <group ref={leftWall} name="Left cutaway wall"><Box
         position={[layout.x - layout.width / 2 + 0.1, 1.35, layout.z]}
         size={[0.22, 2.7, layout.depth]}
-        color={night ? "#1c2824" : palette.wall}
+        color={night ? "#1c2824" : "#f7f5f0"}
       /></group>
       <group ref={backWall} name="Back cutaway wall"><Box
         position={[layout.x, 1.35, -7.9]}
         size={[layout.width, 2.7, 0.22]}
-        color={night ? "#1c2824" : palette.wall}
+        color={night ? "#1c2824" : "#f7f5f0"}
       />
       {[-7, -2, 3].map((x) => (
         <group key={x} position={[x, 1.7, -7.74]}>
@@ -234,7 +234,7 @@ function Room({ night, profile, total }: { night: boolean; profile: RoomProfile;
           <Box
             position={[0, 0, 0.08]}
             size={[2.83, 1.3, 0.035]}
-            color={night ? "#163044" : palette.window}
+            color={night ? "#163044" : "#d5e6f2"}
           />
           <Box
             position={[0, 0, 0.12]}
@@ -257,9 +257,9 @@ function Room({ night, profile, total }: { night: boolean; profile: RoomProfile;
       <Box
         position={[layout.carpet.x, 0.07, layout.carpet.z]}
         size={[layout.carpet.width, 0.05, layout.carpet.depth]}
-        color={night ? "#547366" : palette.rug}
+        color={night ? "#547366" : "#d5e4d2"}
       />
-      <Box position={[11.2, 0.075, layout.z]} size={[14.4, 0.06, layout.depth - 1]} color={night ? "#806955" : palette.lounge} />
+      <Box position={[11.2, 0.075, layout.z]} size={[14.4, 0.06, layout.depth - 1]} color={night ? "#806955" : "#f3ece2"} />
       <group name="Chilling lounge">
         {loungeLayout(total).sofas.map(({ x, z }, index) => <group key={index} name={`Lounge sofa ${index + 1}`} position={[x, 0, z]}>
           <Box position={[0, 0.34, 0]} size={[4.2, 0.6, 1.8]} color={night ? "#766c83" : palette.accent} />
@@ -376,6 +376,7 @@ function Walker({
   interaction,
   showcase,
   cast,
+  plateName,
 }: {
   id: string;
   index: number;
@@ -395,6 +396,7 @@ function Walker({
   reducedMotion: boolean;
   interaction?: { slot: number; side: "from" | "to" };
   cast: CharacterCast;
+  plateName?: string;
 }) {
   const mascot = useRef<MascotCharacter | null>(null);
   const parent = useRef<THREE.Group>(null);
@@ -489,16 +491,16 @@ function Walker({
           <meshBasicMaterial color="#f2b94a" side={THREE.DoubleSide} />
         </mesh>
       )}
-      {agent ? <AgentNameplate name={agentDisplayName(agent)} color={STATUS_COLOR[agent.status]} selected={selected} />
+      {agent ? <AgentNameplate name={plateName || agentDisplayName(agent)} color={STATUS_COLOR[agent.status]} selected={selected} />
         : showcase && <AgentNameplate name={SHOWCASE_CHARACTERS[showcase.index].name} color="#8b9b70" selected={selected} />}
     </group>
   );
 }
-function CameraReset({ resetKey, total, view }: { resetKey: number; total: number; view: RoomView | null }) {
+function CameraReset({ resetKey, total, floors, view }: { resetKey: number; total: number; floors: number; view: RoomView | null }) {
   const { camera, controls, invalidate, size } = useThree();
   useEffect(() => {
     if (!view || !(camera instanceof THREE.PerspectiveCamera)) return;
-    const frame = roomCameraFrame(total, size.width / size.height, camera.fov, view);
+    const frame = roomCameraFrame(total, size.width / size.height, camera.fov, view, floors);
     const orbit = controls as OrbitControlsImpl | null;
     // Clear pending drag damping before applying a preset.
     if (orbit) { orbit.enableDamping = false; orbit.update(); }
@@ -508,7 +510,7 @@ function CameraReset({ resetKey, total, view }: { resetKey: number; total: numbe
     orbit?.update();
     if (orbit) orbit.enableDamping = true;
     invalidate();
-  }, [resetKey, total, view, camera, controls, invalidate, size.width, size.height]);
+  }, [resetKey, total, floors, view, camera, controls, invalidate, size.width, size.height]);
   return null;
 }
 const SHOWCASE_IDS = SHOWCASE_CHARACTERS.map((character) => character.id);
@@ -734,6 +736,7 @@ export default function OfficeWorld({
   const manager = managerLook(profile.manager);
   const managerName = MANAGER_NAMES[manager];
   const floors = stackFloors(agents);
+  const projectNames = new Set(agents.map((agent) => agent.project).filter((project): project is string => Boolean(project)));
   const floorGroups = floors.length
     ? floors.map((key, index) => ({ key, y: index * FLOOR_GAP, agents: agents.filter((agent) => floorKey(agent, floors.some((item) => item.includes("::"))) === key) }))
     : [{ key: "preview", y: 0, agents: [] as OfficeAgent[] }];
@@ -748,7 +751,7 @@ export default function OfficeWorld({
       style={{ cursor: hammerHeld ? "none" : "auto" }}
     >
       <OfficeAnimationClock paused={paused} time={animationTime} />
-      <color attach="background" args={[night ? "#0c1210" : palette.backdrop]} />
+      <color attach="background" args={[night ? "#3c4642" : "#f7f6f2"]} />
       <ambientLight intensity={night ? 0.45 : 0.7} />
       <hemisphereLight args={["#8fd9c4", "#1a2420", night ? 0.35 : 0.55]} />
       <directionalLight
@@ -779,13 +782,13 @@ export default function OfficeWorld({
           <Label text="TOY HAMMER" subtitle="Pick up. Tap a coworker." position={[0, 0, 0]} width={2.7} height={0.7} bg="#fff4db" color="#594b32" />
         </Billboard>}
       </>}
-      {floor.key !== "preview" && <Billboard position={[7.2, 3.4, 4.2]}>
+      {floor.key !== "preview" && <Billboard position={[1.6, 2.5, 8.2]}>
         <Label text={floorHeading(floor.key).title} subtitle={(() => {
           const active = floor.agents.filter((agent) => agent.status === "working").length;
-          const where = floorHeading(floor.key).project;
+          const platform = floorHeading(floor.key).platform;
           const count = active ? `${active} active · ${floor.agents.length} on this floor` : `${floor.agents.length} seated · quiet`;
-          return where ? `${where} · ${count}` : count;
-        })()} position={[0, 0, 0]} width={4.2} height={0.7} bg="#141c19" color="#e7f2ec" />
+          return platform ? `${platform} · ${count}` : count;
+        })()} position={[0, 0, 0]} width={6.4} height={1.45} bg="#163028" color="#f4fff8" />
       </Billboard>}
       {floor.agents.map((a) => ({
             id: a.id,
@@ -813,6 +816,7 @@ export default function OfficeWorld({
           selected={selected === a.id}
           onSelect={() => onSelect(a.id)}
           cast={cast}
+          plateName={projectNames.size > 1 ? a.agent?.project : undefined}
         />
       ))}
       </group>)}
@@ -856,7 +860,7 @@ export default function OfficeWorld({
           <Label text={managerName.toUpperCase()} subtitle="Reviews every run." position={[0, 0, 0]} width={3.7} height={0.9} bg="#141c19" color="#e7f2ec" />
         </Billboard>
       </group>
-      <CameraReset resetKey={cameraKey + viewKey} total={agents.length} view={view} />
+      <CameraReset resetKey={cameraKey + viewKey} total={agents.length} floors={floors.length} view={view} />
       <OrbitControls
         ref={setOrbit}
         makeDefault

@@ -48,16 +48,16 @@ export function loungeLayout(total: number) {
 export const FLOOR_GAP = 10;
 const FLOOR_PREFERENCE = ["cursor", "claude", "codex", "grok", "chatgpt"];
 
-export function floorKey(agent: { harness: string; project?: string | null }, multi = false) {
+export function floorKey(agent: { harness: string; project?: string | null }, _multi = false) {
   const platform = agent.harness === "local" ? "codex" : agent.harness || "office";
-  if (!multi || !agent.project) return platform;
+  if (!agent.project) return platform;
   return `${agent.project}::${platform}`;
 }
 
 export function floorHeading(key: string) {
   const [project, platform] = key.split("::");
-  if (platform) return { title: platform.toUpperCase(), project };
-  return { title: key.toUpperCase(), project: "" };
+  if (platform) return { title: project, platform: platform.toUpperCase() };
+  return { title: key.toUpperCase(), platform: "" };
 }
 
 /** One floor per platform. A second connected project splits that platform into another floor. */
@@ -69,7 +69,7 @@ export function stackFloors(agents: { harness: string; project?: string | null }
     const key = floorKey(agent, multi);
     if (!present.includes(key)) present.push(key);
   }
-  if (!multi) {
+  if (!projects.length) {
     return [
       ...FLOOR_PREFERENCE.filter((key) => present.includes(key)),
       ...present.filter((key) => !FLOOR_PREFERENCE.includes(key)),

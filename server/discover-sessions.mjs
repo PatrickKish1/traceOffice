@@ -1,7 +1,7 @@
 import path from "node:path";
 import { readEditorSessions } from "./editor-sessions.mjs";
 import { readGrokSessions } from "./grok-sessions.mjs";
-import { listSessionProjects, projectPathForSlug } from "./project-catalog.mjs";
+import { applyDisplayName, listSessionProjects, projectLabel, projectPathForSlug } from "./project-catalog.mjs";
 
 const SLUG = /^[A-Za-z0-9._-]{1,180}$/;
 let catalogCache = { at: 0, cwd: "", projects: [] };
@@ -46,6 +46,14 @@ function scopeAgent(agent, project, multiple) {
   return { ...agent, id, project: project.label, projectId: project.id };
 }
 
+/** The four newest primary sessions. Helpers stay off the floor so one busy repo cannot fill it. */
+export function seatRecent(agents, limit = 4) {
+  return [...agents]
+    .filter((agent) => !String(agent.id).includes(":helper:"))
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+    .slice(0, limit);
+}
+
 function scopeLink(link, project, multiple) {
   if (!multiple) return link;
   return { ...link, fromId: `${project.id}::${link.fromId}`, toId: `${project.id}::${link.toId}` };
@@ -61,11 +69,17 @@ export async function discoverSessions(options = {}) {
   }
   const catalog = catalogCache.projects;
   const chosen = requested.length
-    ? requested.map((id) => catalog.find((item) => item.id === id)).filter(Boolean)
+    ? requested.map((id) => catalog.find((item) => item.id === id) ?? {
+        id,
+        label: applyDisplayName(projectLabel(id), undefined, id),
+        current: false,
+        sessions: 0,
+        platforms: [],
+      })
     : catalog.filter((item) => item.current).slice(0, 1);
   const loads = chosen.length
     ? chosen
-    : [{ id: "cwd", label: path.basename(cwd), current: true, sessions: 0, platforms: [] }];
+    : [{ id: "cwd", label: applyDisplayName(path.basename(cwd)), current: true, sessions: 0, platforms: [] }];
   const multiple = loads.length > 1;
   const agents = [];
   const interactions = [];
@@ -73,6 +87,7 @@ export async function discoverSessions(options = {}) {
   for (const project of loads) {
     const folder = project.current ? cwd : projectPathForSlug(project.id);
     const parts = await discoverOne(folder, now);
+    const pooled = [];
     for (const part of parts) {
       const existing = platforms.find((item) => item.id === part.platform.id);
       if (!existing) platforms.push({ ...part.platform });
@@ -81,14 +96,13 @@ export async function discoverSessions(options = {}) {
         existing.sessions += part.platform.sessions;
         existing.active += part.platform.active;
       }
-      for (const agent of part.agents) {
-        const scoped = scopeAgent(agent, project, multiple);
-        if (agents.some((item) => item.id === scoped.id)) continue;
-        agents.push(scoped);
-        if (agents.length >= 50) break;
-      }
+      pooled.push(...part.agents);
       interactions.push(...part.interactions.map((link) => scopeLink(link, project, multiple)));
-      if (agents.length >= 50) break;
+    }
+    for (const agent of seatRecent(pooled)) {
+      const scoped = scopeAgent(agent, project, multiple);
+      if (agents.some((item) => item.id === scoped.id)) continue;
+      agents.push(scoped);
     }
   }
   const ids = new Set(agents.map((agent) => agent.id));
@@ -99,8 +113,8 @@ export async function discoverSessions(options = {}) {
     interactions: interactions.filter((link) => ids.has(link.fromId) && ids.has(link.toId)).slice(0, 100),
     platforms,
     projects: catalog.map((project) => ({ ...project, connected: connected.has(project.id) })),
-    project: loads.map((project) => project.label).join(" · ") || path.basename(cwd),
-    total: agents.length,
+    project: loads.map((project) => project.label).join(" · ") || applyDisplayName(path.basename(cwd)),
+    total: Math.max(agents.length, loads.reduce((sum, project) => sum + (Number(project.sessions) || 0), 0)),
     observedAt: new Date(now).toISOString(),
   };
 }

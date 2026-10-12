@@ -127,6 +127,14 @@ test("platforms stack as separate floors and keep every session", () => {
   assert.equal(FLOOR_GAP, 10);
 });
 
+test("one project still names each platform floor", () => {
+  const floors = stackFloors([
+    { harness: "cursor", project: "TraceOffice" },
+    { harness: "claude", project: "TraceOffice" },
+  ]);
+  assert.deepEqual(floors, ["TraceOffice::cursor", "TraceOffice::claude"]);
+});
+
 test("a second project gets its own platform floor", () => {
   const floors = stackFloors([
     { harness: "cursor", project: "OpenAI-hack" },

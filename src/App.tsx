@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowUpRight,
+  ChevronLeft,
   ChevronRight,
   CircleHelp,
   Coffee,
@@ -37,8 +38,9 @@ import {
 } from "./officeActivity";
 import { STATUS_LABELS, liveInteractions } from "./officeBehavior";
 import { floorAdvice } from "./floorAdvice";
+import { demoAgents } from "./demoFloor";
 import { BUSINESS_PLAN } from "./businessPlan";
-import { useRobotsSessions } from "./integrations/codex/useRobotsSessions";
+import { useRobotsSessions, type SessionProject } from "./integrations/codex/useRobotsSessions";
 import { useLiveRoom } from "./integrations/codex/useLiveRoom";
 import LiveRoomBar from "./components/import/LiveRoomBar";
 import Welcome from "./components/import/Welcome";
@@ -88,12 +90,16 @@ export default function App() {
   const [interactions, setInteractions] = useState<AgentInteraction[]>(saved.interactions);
   const [interactionClock, setInteractionClock] = useState(Date.now());
   const [paused, setPaused] = useState(false);
+  const [demoOn, setDemoOn] = useState(false);
+  const [demoCast, setDemoCast] = useState<OfficeAgent[]>([]);
   const [jevMuted, setJevMutedState] = useState(() => isJevMuted());
   const [planOpen, setPlanOpen] = useState(false);
   const [drill, setDrill] = useState<OfficeAgent | null>(null);
   const [drillError, setDrillError] = useState("");
   const [drillRunning, setDrillRunning] = useState(false);
   const [night, setNight] = useState(true);
+  const [feedPlatform, setFeedPlatform] = useState<string | null>(null);
+  const [projectPicker, setProjectPicker] = useState(false);
   const [cameraKey, setCameraKey] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [help, setHelp] = useState(false);
@@ -136,6 +142,17 @@ export default function App() {
   }
   function dismissWelcome() { setWelcome(false); }
   const [localSnapshot, setLocalSnapshot] = useState<OfficeSnapshot>({ version: 1, agents: [] });
+  useEffect(() => {
+    if (!demoOn) {
+      setDemoCast([]);
+      return;
+    }
+    const started = Date.now();
+    const tick = () => setDemoCast(demoAgents(Date.now() - started));
+    tick();
+    const timer = window.setInterval(tick, 400);
+    return () => window.clearInterval(timer);
+  }, [demoOn]);
   const local = useRobotsSessions((snapshot) => {
     setInteractions(snapshot.interactions ?? []);
     setInteractionClock(Date.now());
@@ -151,7 +168,7 @@ export default function App() {
     const timer = setInterval(() => setInteractionClock(Date.now()), 5000);
     return () => clearInterval(timer);
   }, [interactions.length, live.interactions.length]);
-  const baseAgents = live.roomId ? live.agents : guest?.agents ?? visibleAgents;
+  const baseAgents = demoOn ? demoCast : live.roomId ? live.agents : guest?.agents ?? visibleAgents;
   const sourceAgents = drill && !baseAgents.some((agent) => agent.id === drill.id) ? [...baseAgents, drill] : baseAgents;
   const roomAgents = sourceAgents.filter(agent => agentIsVisible(agent));
   useEffect(() => {
@@ -180,7 +197,7 @@ export default function App() {
       setDrillRunning(false);
     }
   }
-  const activeLinks = live.roomId ? liveInteractions(roomAgents, live.interactions, interactionClock)
+  const activeLinks = demoOn ? [] : live.roomId ? liveInteractions(roomAgents, live.interactions, interactionClock)
     : guest || (local.enabled && local.state !== "connected")
       ? [] : liveInteractions(roomAgents, interactions, interactionClock);
   const linkedPartner = (id: string) => {
@@ -206,6 +223,9 @@ export default function App() {
     } catch (e) { setOfficeError(e instanceof Error ? e.message : "Unable to join this snapshot."); }
   }
   const behavior = (a: OfficeAgent) => linkedPartner(a.id) ? `Working with ${linkedPartner(a.id)!.name}` : agentActivityLabel(a) ?? STATUS_LABELS[a.status];
+  const severalProjects = new Set(roomAgents.map((agent) => agent.project).filter(Boolean)).size > 1;
+  const rosterTitle = (agent: OfficeAgent) => severalProjects && agent.project ? agent.project : agentDisplayName(agent);
+  const rosterDetail = (agent: OfficeAgent) => severalProjects ? `${agent.name} · ${behavior(agent)}` : behavior(agent);
   function watchLocal(source: "grok" | "index" | "editors" = "grok", harness: "" | "cursor" | "claude" = "") {
     setSelected(null);
     setWelcome(false);
@@ -241,6 +261,7 @@ export default function App() {
           {!guest && <a className="studio-button" href="/guides">Guide</a>}
           {!guest && <button className="studio-button" onClick={() => setStudioTab("profile")}><Palette size={15} /> Room studio</button>}
           {!guest && <button className="studio-button social-top-button" title="Import LinkedIn or X" onClick={() => setStudioTab("social")}><Globe2 size={15} /> Import social</button>}
+          {!guest && <button className="studio-button demo-button" type="button" aria-pressed={demoOn} title={demoOn ? "Stop demo" : "Play demo"} onClick={() => { setSelected(null); setDemoOn((on) => !on); }}>{demoOn ? <Pause size={15} /> : <Play size={15} />} {demoOn ? "Stop demo" : "Play demo"}</button>}
           {!guest && <button className="import-button" onClick={() => setWelcome(true)}><ArrowDownToLine size={15} /> Import agents</button>}
         </div>
       </header>
@@ -249,7 +270,12 @@ export default function App() {
           <div className="eyebrow"><span /> {guest ? "FRIEND'S ROOM" : "A NEW WAY TO WORK"}</div>
           <h1>{guest ? guest.profile.displayName : profile.displayName === "My room" ? <>Running is not<br />{" "}the same as working<span>.</span></> : <>{profile.displayName}<span>.</span></>}</h1>
           <p className="intro">{guest ? "Join combines these shared agents with yours in this browser. Changes are not sent to the host." : profile.interests || "The office shows who is seated. Neatlogs keeps the record of what they did."}</p>
-          {!guest && (
+          {!guest && (demoOn ? (
+            <section className="floor-agent" aria-label="Demo">
+              <b>Four floors, in this browser</b>
+              <p>Agents arrive, one fails, then recovers. Nothing is posted to Neatlogs.</p>
+            </section>
+          ) : (
             <section className="floor-agent" aria-label="Floor agent">
               <b>{advice.title}</b>
               <p>{advice.detail}</p>
@@ -259,7 +285,7 @@ export default function App() {
               </div>
               {drillError && <small role="alert">{drillError}</small>}
             </section>
-          )}
+          ))}
           {visibleProfile.socialUrl && <a className="social-link" href={visibleProfile.socialUrl} target="_blank" rel="noreferrer">View social profile <ArrowUpRight size={12} /></a>}
           <div className="section-heading">
             {guest ? "SHARED AGENTS" : "YOUR OFFICE"}
@@ -284,8 +310,8 @@ export default function App() {
                     <span className="eyes">••</span>
                   </span>
                   <span>
-                    <b title={agentDisplayName(a)}>{agentDisplayName(a)}</b><small>{a.name}</small>
-                    <small>{a.project ? `${a.project} · ` : ""}{behavior(a)}</small>
+                    <b title={rosterTitle(a)}>{rosterTitle(a)}</b>
+                    <small>{rosterDetail(a)}</small>
                   </span>
                   <ChevronRight size={15} />
                 </button>
@@ -313,7 +339,7 @@ export default function App() {
           </div>}
           {guest?.stats && <div className="friend-stats"><b>Shared totals</b><span>Tokens <strong>{guest.stats.totalTokens === null ? "Not shared" : guest.stats.totalTokens.toLocaleString()}</strong></span><span>Spend <strong>{guest.stats.totalSpend === null ? "Not shared" : `${guest.stats.currency} ${guest.stats.totalSpend.toFixed(2)}`}</strong></span><small>Owner-entered snapshot</small></div>}
           <div className="sidebar-bottom">
-            {!guest && !live.roomId && local.enabled && (
+            {!guest && !live.roomId && local.enabled && !demoOn && (
               <div className="connection-summary">
                 <b>
                   {local.project || "Local sessions"} ·{" "}
@@ -324,18 +350,18 @@ export default function App() {
                   {local.total ? ` of ${local.total}` : ""}
                 </span>
                 {local.catalog.length > 0 && (
-                  <div className="project-picks" aria-label="Projects">
-                    {[...local.catalog.filter((item) => item.connected), ...local.catalog.filter((item) => !item.connected)].slice(0, 8).map((item) => (
-                      <button key={item.id} type="button" aria-pressed={item.connected} onClick={() => local.toggleProject(item.id)}>
-                        {item.label} · {item.sessions}
-                      </button>
-                    ))}
-                  </div>
+                  <LocalFeed
+                    catalog={local.catalog}
+                    platform={feedPlatform}
+                    onPlatform={setFeedPlatform}
+                    onToggle={local.toggleProject}
+                    onShowMore={() => setProjectPicker(true)}
+                  />
                 )}
                 <button
                   onClick={() => {
                     local.disconnect();
-                    // Disconnecting hides the feed and retains saved snapshots.
+                    setFeedPlatform(null);
                     setInteractions([]);
                   }}
                 >
@@ -366,9 +392,9 @@ export default function App() {
           <div className="world-top">
             <div className="world-caption">
               <span className="live-dot" />
-              {!roomAgents.length ? `Preview · ${MANAGER_NAMES[managerLook(visibleProfile.manager)]} is reviewing` : guest ? "FRIEND'S ROOM" : live.roomId ? "LIVE AGENT ROOM" : "YOUR AGENT OFFICE"}
+              {!roomAgents.length ? `Preview · ${MANAGER_NAMES[managerLook(visibleProfile.manager)]} is reviewing` : demoOn ? "DEMO" : guest ? "FRIEND'S ROOM" : live.roomId ? "LIVE AGENT ROOM" : "YOUR AGENT OFFICE"}
               <span className="mode-label">
-                {guest ? "Shared snapshot" : live.roomId ? live.state : local.enabled
+                {demoOn ? "Simulated" : guest ? "Shared snapshot" : live.roomId ? live.state : local.enabled
                       ? local.state === "connected"
                         ? "Local feed"
                         : local.state
@@ -495,17 +521,19 @@ export default function App() {
                       </div>
                       {guest?.stats?.agentTotals?.[agent.id] && <><div><dt>Total tokens</dt><dd>{guest.stats.agentTotals[agent.id].totalTokens === null ? "Not reported" : guest.stats.agentTotals[agent.id].totalTokens!.toLocaleString()}</dd></div><div><dt>Spend</dt><dd>{guest.stats.agentTotals[agent.id].totalSpend === null ? "Not reported" : `USD ${guest.stats.agentTotals[agent.id].totalSpend!.toFixed(2)}`}</dd></div></>}
                     </dl>
-                    {agent.traceUrl ? (
+                    {demoOn ? (
+                      <small>Simulated session. Nothing was sent.</small>
+                    ) : agent.traceUrl ? (
                       <a className="detail-link" href={agent.traceUrl} target="_blank" rel="noreferrer">Open this session in Neatlogs <ArrowUpRight size={13} /></a>
                     ) : (
                       <button type="button" className="detail-link" onClick={() => navigator.clipboard.writeText(agent.id)}>Copy session id for Neatlogs</button>
                     )}
-                    <small>Workflow trace-office. The office shows who is seated. Neatlogs shows the trace.</small>
+                    {!demoOn && <small>Workflow trace-office. The office shows who is seated. Neatlogs shows the trace.</small>}
                     <small>
                       Source event {new Date(agent.updatedAt).toLocaleString()}
                     </small>
                     {agent.status === 'offline' && <small>Disconnected {new Date(agent.disconnectedAt ?? agent.updatedAt).toLocaleString()} · hidden after 30 minutes</small>}
-                    {!guest && !live.roomId && local.enabled && (
+                    {!guest && !live.roomId && local.enabled && !demoOn && (
                       <small className="context-note">
                         Live status follows actual session events. Disconnected sources stay unconfirmed.
                       </small>
@@ -571,7 +599,7 @@ export default function App() {
               </button>}
             </div>
             <span className="corner-note">
-              Made of pixels. Full of personality.
+              TraceOffice the workspace of the future.
             </span>
           </div>
         </section>
@@ -579,15 +607,11 @@ export default function App() {
       <footer>
         <span>
           <span className="footer-dot" />
-          {guest ? `${guest.profile.displayName} · shared snapshot` : live.roomId
+          {demoOn ? `${roomAgents.length} simulated agents · stays in this browser` : guest ? `${guest.profile.displayName} · shared snapshot` : live.roomId
               ? `${roomAgents.length} agents · live room ${live.state}`
               : local.enabled
                 ? `${roomAgents.length} sessions · ${local.state} · checked ${local.observedAt ? new Date(local.observedAt).toLocaleTimeString() : "—"}`
                 : `${roomAgents.length} imported agents · snapshot mode`}
-        </span>
-        <span>
-          Powered by Three.js <span className="footer-separator">/</span> Built
-          with a little <Heart size={11} />
         </span>
       </footer>
       {!guest && studioTab && <RoomStudio key={studioTab} initialTab={studioTab} profile={profile} onProfile={setProfile} books={books} onBooks={setBooks} projects={projects} onProjects={setProjects} stats={stats} onStats={setStats} share={share} onShare={setShare} agents={roomAgents} onClose={() => setStudioTab(null)} />}
@@ -609,6 +633,14 @@ export default function App() {
           <small>These figures are planning assumptions. Saving them into a live cfo.ai workspace still needs browser sign-in at the cfo.ai MCP connection.</small>
         </div>
       )}
+      {projectPicker && !guest && (
+        <ProjectPicker
+          catalog={local.catalog}
+          platform={feedPlatform}
+          onToggle={local.toggleProject}
+          onClose={() => setProjectPicker(false)}
+        />
+      )}
       {welcome && !guest && <Welcome live={live} existingCount={roomAgents.length} onExplore={dismissWelcome} onWatchLocal={watchLocal} onSocialImport={() => { dismissWelcome(); setStudioTab("social"); }} onImport={(imported, importedLinks) => {
         addAgents(imported, importedLinks);
         setInteractionClock(Date.now());
@@ -619,4 +651,83 @@ export default function App() {
 
     </div>
   );
+}
+
+const PLATFORM_ORDER = ["cursor", "claude", "codex", "grok", "chatgpt"];
+const FEED_PREVIEW = 4;
+
+function platformName(id: string) {
+  if (id === "cursor") return "Cursor";
+  if (id === "claude") return "Claude";
+  if (id === "codex") return "Codex";
+  if (id === "grok") return "Grok";
+  if (id === "chatgpt") return "ChatGPT";
+  return id;
+}
+
+function platformsIn(catalog: SessionProject[]) {
+  const present = new Set(catalog.flatMap((item) => item.platforms ?? []));
+  return [
+    ...PLATFORM_ORDER.filter((id) => present.has(id)),
+    ...[...present].filter((id) => !PLATFORM_ORDER.includes(id)),
+  ];
+}
+
+function projectsFor(catalog: SessionProject[], platform: string | null, drilled: boolean) {
+  const listed = catalog.filter((item) => !drilled || !platform || (item.platforms ?? []).includes(platform));
+  return [...listed.filter((item) => item.connected), ...listed.filter((item) => !item.connected)];
+}
+
+function ProjectChips({ projects, onToggle }: { projects: SessionProject[]; onToggle: (id: string) => void }) {
+  return <div className="project-picks" aria-label="Projects">
+    {projects.map((item) => (
+      <button key={item.id} type="button" aria-pressed={item.connected} onClick={() => onToggle(item.id)}>
+        {item.label} · {item.sessions}
+      </button>
+    ))}
+  </div>;
+}
+
+function LocalFeed({
+  catalog, platform, onPlatform, onToggle, onShowMore,
+}: {
+  catalog: SessionProject[];
+  platform: string | null;
+  onPlatform: (id: string | null) => void;
+  onToggle: (id: string) => void;
+  onShowMore: () => void;
+}) {
+  const platforms = platformsIn(catalog);
+  const filtering = platforms.length >= 2 && Boolean(platform);
+  const projects = projectsFor(catalog, platform, filtering);
+  return <>
+    {platforms.length >= 2 && <div className="project-picks" aria-label="Platforms">
+      <button type="button" aria-pressed={!platform} onClick={() => onPlatform(null)}>All</button>
+      {platforms.map((id) => (
+        <button key={id} type="button" aria-pressed={platform === id} onClick={() => onPlatform(id)}>{platformName(id)}</button>
+      ))}
+    </div>}
+    <ProjectChips projects={projects.slice(0, FEED_PREVIEW)} onToggle={onToggle} />
+    {projects.length > FEED_PREVIEW && <button type="button" className="feed-more" onClick={onShowMore}>Show more</button>}
+  </>;
+}
+
+function ProjectPicker({
+  catalog, platform, onToggle, onClose,
+}: {
+  catalog: SessionProject[];
+  platform: string | null;
+  onToggle: (id: string) => void;
+  onClose: () => void;
+}) {
+  const platforms = platformsIn(catalog);
+  const projects = projectsFor(catalog, platform, platforms.length >= 2);
+  return <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal project-picker" role="dialog" aria-label="Choose a project" onClick={(event) => event.stopPropagation()}>
+      <button type="button" className="close" aria-label="Close projects" onClick={onClose}><X size={16} /></button>
+      <h2>{platform ? platformName(platform) : "Projects"}</h2>
+      <p>Pick a project to seat it. Press it again to take it off the floor.</p>
+      <ProjectChips projects={projects} onToggle={onToggle} />
+    </div>
+  </div>;
 }

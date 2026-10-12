@@ -9,5 +9,6 @@ playwright-report/
 *.tsbuildinfo
 .playwright-mcp/
 .wrangler/
+.trace-office/
 public/codex-bridge.mjs
 public/agent-bridge.mjs
