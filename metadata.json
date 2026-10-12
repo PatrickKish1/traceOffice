@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "01M4RV6G5EWDV8875WCXRZEFXQ",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 24,
+  "files_touched": [
+    ".gitignore",
+    "server/discover-sessions.mjs",
+    "server/editor-sessions.mjs",
+    "server/project-catalog.mjs",
+    "src/App.tsx",
+    "src/Guide.tsx",
+    "src/components/OfficeWorld.tsx",
+    "src/components/office/camera.ts",
+    "src/officeBehavior.ts",
+    "src/style.css",
+    "tests/office-behavior.test.mjs",
+    "tests/project-catalog.test.mjs",
+    "tests/room-camera.test.mjs",
+    "tests/seat-recent.test.mjs"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 1356277,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 41138944,
+    "output_tokens": 253487,
+    "api_call_count": 19
+  }
+}

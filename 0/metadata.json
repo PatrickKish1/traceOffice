@@ -1,0 +1,218 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "01M4RV6G5EWDV8875WCXRZEFXQ",
+  "session_id": "845de4f2-9059-48de-b889-22b76bdeaa8a",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-12T19:59:53.986844Z",
+  "branch": "main",
+  "checkpoints_count": 24,
+  "save_step_count": 21,
+  "files_touched": [
+    ".gitignore",
+    "server/discover-sessions.mjs",
+    "server/editor-sessions.mjs",
+    "server/project-catalog.mjs",
+    "src/App.tsx",
+    "src/Guide.tsx",
+    "src/components/OfficeWorld.tsx",
+    "src/components/office/camera.ts",
+    "src/officeBehavior.ts",
+    "src/style.css",
+    "tests/office-behavior.test.mjs",
+    "tests/project-catalog.test.mjs",
+    "tests/room-camera.test.mjs",
+    "tests/seat-recent.test.mjs"
+  ],
+  "agent": "Cursor",
+  "model": "grok-4.7-high-fast",
+  "turn_id": "38b6cc7135ac",
+  "checkpoint_transcript_start": 643,
+  "transcript_lines_at_start": 643,
+  "compact_transcript_start": 85,
+  "token_usage": {
+    "input_tokens": 1356277,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 41138944,
+    "output_tokens": 253487,
+    "api_call_count": 19
+  },
+  "session_metrics": {
+    "turn_count": 30,
+    "context_tokens": 232112,
+    "context_window_size": 256000
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-12T19:59:53.8656Z",
+    "agent_lines": 274,
+    "agent_removed": 72,
+    "human_added": 101,
+    "human_modified": 16,
+    "human_removed": 0,
+    "total_committed": 388,
+    "total_lines_changed": 463,
+    "agent_percentage": 74.73002159827213,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 223,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 263,
+      "agent_lines_removed": 4
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 419,
+      "agent_lines_removed": 34
+    },
+    {
+      "checkpoint_number": 5,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 423,
+      "agent_lines_removed": 38
+    },
+    {
+      "checkpoint_number": 6,
+      "user_lines_added": 3,
+      "user_lines_removed": 4,
+      "agent_lines_added": 439,
+      "agent_lines_removed": 43,
+      "user_added_per_file": {
+        "src/App.tsx": 3
+      },
+      "user_removed_per_file": {
+        "src/App.tsx": 4
+      }
+    },
+    {
+      "checkpoint_number": 7,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 571,
+      "agent_lines_removed": 45
+    },
+    {
+      "checkpoint_number": 8,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 440,
+      "agent_lines_removed": 45
+    },
+    {
+      "checkpoint_number": 9,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 10,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 11,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 12,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 13,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 14,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 15,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 16,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 17,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 18,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 19,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 20,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 21,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    },
+    {
+      "checkpoint_number": 22,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 515,
+      "agent_lines_removed": 76
+    }
+  ]
+}
