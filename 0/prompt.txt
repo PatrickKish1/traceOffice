@@ -1,0 +1,224 @@
+is there anyway to sort of have a communication back input for logs from neatlogs which cursor can use for instance have a file pull the logs data and while a cursor agent is working it launcehes a subagent to check on the logs pulled to be able to make fixes makes sense?
+
+---
+
+so is it now that lets say when a user clones this repo and runs it do we have a setup where we discover the OS then try to find whwre we can get their curosr or cluade sessions and then be able to load it up and whever either of them runs or is working with a particular project then our systrem moves a chracter on the offic e to a desk to show working and then have the Jev move over as another layer and then trigger neatlogs traceability and return system
+
+---
+
+does every session we have here log something on neatlogs, heres what im lookign at i think i mentioned that i needed a way for us to sort of auto detect projects on pc, so its not enitrley auto detect but then lets say someone tries to inport agetn and then pick a platform we should be able to pick up from their pc the sessions they had that way we can list them for them to select so it works across multiple platfomrs so now with cursor despite having some projects already loaded i think its only one but then i see multiple sessions which is fine so now i want to be able to see other projects so now ewhen inporting agent its more like importing a project and extensivelhy we could even make it possible that another platform could work on a project for instance curosr is the origin but then we can also get claude to also work on it, which is why i said we need the neatlogs integration and storing some of the logs and stuff inside a file the agents can read from so that they can make fixes pickup issuyes and you habe lkke a self training model that makes usre things works so lets pull everything we can from neatlogs like lets integrate everythign ffrom it onto herre and point me where the file is so i know whats going on in there, now i need to see logs and reaces and incidemtns and alerts on neatlogs dashboard can you simmilate some overthere foer me to see ??
+
+---
+
+Project name is showing as this. Would it be possible to change the name so that it doesn't say OpenAI Hack? Claude joined OpenAI-hack and the Edit step failed.
+talking of on the nrestlogs end and also app itsef. maybe a secret file for. us to chane the name but doesnt get commitd
+
+---
+
+gthe light mode version o the app can we make it white variant not the entire app just the office because the dark it seems a little hard to see maybe forr the dark use a lighter shade of black for the background not the whoole app just the canves where the offivce is and i noticed that on the side bar the local ffed it has listed some projects which is great but then when the projects are a lot then it becomes a long list so why not add a show more button so it shows a modal to pick the projects from and lcoal geed if two or more platforms are connected then the list shows the platfomr and when clicked the content updates to show the projects list with the show more button if needed and a back button to go to the platfomr list so its all in that smal card  makes sense?? and i noticed that all the agents work are names traceOffice can we try to get like the. proiject names like we are doing in the locla feed side and if we have each project as a floor then it means every platfomr should be its own space so as part of the items on the canvas the one for pause speaker light and expand lets add one that lets you switch between platfroms ubkess we can keep what we have then just label each floor with the project and platform its so much better
+
+---
+
+So there is no way to create an alert via API then it sucks alerrts shoudl be programmable that way even agents can do it and athe human can review before the agents submits it i think we might need to add this as a flag issue for neatlogs so that they can work on it and then it means building alerts would so much much eaiser and incidnet reports as well and on detections page i got this
+
+Suggested detections · Showing 4 of 4 found in your recent traces
+Hide
+Dismiss shown 4
+Add shown 4
+Dynamic Tool Usage Tracker
+Identifies spans where dynamic tool calls occur during the execution process.
+
+Neutral
+Regex · All spans
+Dismiss
+Review
+Add
+Recovery Status Monitor
+Flags spans where the status is identified as recovered to track system stability events.
+
+Neutral
+Regex · All spans
+Dismiss
+Review
+Add
+Shared Project Tool Error
+Flags occurrences of tool errors related to shared project access or operations.
+
+Negative
+Regex · All spans
+Dismiss
+Review
+Add
+Missing File Error Detector
+Flags instances where the system reports that a target file is missing from the project.
+
+Negative
+Regex · All spans
+Dismiss
+Review
+Add
+
+
+
+Scope
+
+Trend
+
+
+
+Expensive LLM Call
+Flags single LLM calls costing more than $1.00
+Neutral	Conditions	1 span type	
+4d ago
+4d ago
+—
+Slow LLM Response
+Flags LLM calls taking longer than 30 seconds
+Neutral	Conditions	1 span type	
+4d ago
+4d ago
+—
+Execution Failed
+Detects execution failures across any span (status = ERROR)
+Negative	Conditions	All spans	
+4d ago
+4d ago
+—
+
+
+
+some are suggesions but you get what it means so is there anyway to get detections data ?? and also i added the suggestions all 4 of them and does it even count for something or we can ignore it ?? so basically now we mnake it possible that based on project alerts could be created and submitted by agents also the part that says in the office the text is a little too not visible can we use a ligher color it seems that neatlogs has an agent that canb create alerts are you sure we are limited by APi or SDK access if so then cool and also evals/evaluations
+
+---
+
+Powered by Three.js
+/
+Built with a little
+
+can we remove thison the app doenst look good and also is there any thign to add or update on the guide page lets do so, alrigth so now i added env for the neatlgos token lets use that instead for the alerts and stuff im sure that key is the right one they said its for http ingest key so yeah lets try again  and also i added neatlogs service token which migh giv eaccess doer the evlautions and stuff
+
+---
+
+alright now lets do the video for the project but i need us to have some incidents on the dashboard and then see if we can trigger some alerts and so far i did not see any evals created lets create them then let me know what i shoudl record from rthe neatlogs dasjbobard then using that video we have the slides then ffmepeg the recordied video to merge them aso we have a 3:30 video not to long of a video and it should be something, so the problem we solve should start, an oopner joke npw there is something circulating that AI should now be SI lets find a way to sell off the priject that with neatlogs and traceoffice SI can be reacher much sooner than anticipated
+
+---
+
+the video is not supposed to be where it can be commited
+
+---
+
+Say this while you record, then stop. The cards carry the joke and the ending.
+
+This is the room. Each floor is a project and a platform. This trace is the failure. The detection caught it, and the alert fired in the app. The eval is the score: did it recover?
+
+for time sake i wont say anything inside the video so if possible to have an audio merged into the video before merging the full video then great
+
+and i picked a prject which had like over 100 sessions and it overstcked the office and floors lets reduce to like top 4 simple or recent 4
+
+
+now i recorded the video and placed in dashboard but i run into an issue where i selcted another project the floor did not show and then i had to end the video and after i tried to diconnect session and reconnect session it wounded up shwing OpenAIhack loca feed and i did not see any other local sessions to select so i try again so now i think if we work on that thats another 5seconds video just to get that part in and then we move aloing with the video
+
+---
+
+resume
+
+---
+
+Our #neatHack submission
+
+[Tell your unique story in your own words.]
+
+Built with @arithecfo @EntireHQ @neatlogs
+
+[Attach your demo video before posting.]
+
+
+they said we should have this piece of text and writing for the video for the starting part of it all there was no audio till like aroind 49 seconds where it was dashboard and it said this is a room which is wrong because it wasnt our app yet
+
+---
+
+Our #neatHack submission
+
+[Tell your unique story in your own words.]
+
+Built with @arithecfo @EntireHQ @neatlogs
+
+[Attach your demo video before posting.]
+
+
+they said we should have this piece of text and writing for the video for the starting part of it all there was no audio till like aroind 49 seconds where it was dashboard and it said this is a room which is wrong because it wasnt our app yet we need a narrative we need to speak throughout the entire video what happend to the plan we spoke about eaelur on the vidoe??
+
+---
+
+can we have a different vooice the one we have is terrible and also dont say "that is the jjioke its very dumb
+
+---
+
+yeah that voice is also terrible. and also the card slides are terrible too plain it needs more to it deisgnit better
+
+---
+
+check on /brag and see if it can find us a different voice give me audio files so i can listen and pick and then checkout this repo to see if it can also point to some good voicesd or improve the slides for the video its great slides but needs some more interactive stuff on it
+
+---
+
+so lets go with nova and we can ddlete the audio files but if there is a way to have a record of them so if i want i can mention the name and any agent anywhere will know what it is
+
+---
+
+and it seems there are puases in the video's audio so when it got to the name did not change the name did and it says obviously then you get a paus before it resumes and the voice said see instead of SI so maybe write it as S.I  and why does it say rhis is neatlogs not the office yet doenst need to say it and why is it saying unnesarry things like its supposed to talk aboiut the project not the UI or seats or anything, it needs to talk about what the project is how it works the problem it solves and the goal of the project and there to much long puases in the audio recorded all those pauses could actually explain a lot of things dosent even necessarily have to be tie to the vidoe it could be a tecnical implemtation or what you can chcieve with it, and you never talked about how exactly neatlogs work how entirre comes in how cfo.ai works or the other one thats about pricing and heck im sure we can even introduce the business plan if time permists and we can even talk about other platforms like neatlogs then mention why neatlogs is better and how we have leverage it to make this system. bigger goal of this project is that you can still monitor your agents even when you are not on your computer and i need a part where the jev audio plays its needed so figgure out something there
+
+---
+
+at 2:27 the video demo i recrded shiukd stop playing and start showinh skides for payment....and we can have qa sliede for jev we can shlw a character like the actyuakl v\characyer from the site
+
+---
+
+we need to have a slide well dsigned for the first slide in the video so its going to be like habing the charcters and title traceofice so its just for branding no need for any words on it and the audio can start as usual so it shows for 1 second so thats 1 second addition to the vidoe now so after that second then the video goes on so this is the only inclusiion
+
+---
+
+so the part where it says SI super intelligence, use this audio insteadl Joshua Charles🇻🇦 - A fascinating and frankly disturbing statement by President Trump, wh....mp3
+
+its on downlodad folder, it needs to be trimmed to get to 0:52 and shoudl end at 0:55 that should do it
+
+---
+
+can we have the chracters so something like give them a sense of life blinmking or stuff so lets say thats another second added
+
+---
+
+at 1:52 it seems thats where talks of subscruption gets in but then the video ends at 2:20 as in like my dashbvoard recoding so in that time frame we can still talk about use cases of the product so that when we get to 2:21 then it starts talking about plans rifht now the plans start way earlier before another talk of plans at 2:29 whihc isnt really ideal
+
+---
+
+lets piush the code for the project make sure its not pushing the things that are not supposed to be pushed, also lets add a button to play a demo, this demo simulates how it works, it spins agents and aboiut 4 floors and we dont need anything to go to the neatlogs
+
+---
+
+build fialed on vercel 
+
+20:00:07.077 Running build in Washington, D.C., USA (East) – iad1
+20:00:07.078 Build machine configuration: 2 cores, 8 GB
+20:00:07.251 Cloning github.com/PatrickKish1/traceOffice (Branch: main, Commit: 3480075)
+20:00:08.355 Cloning completed: 1.103s
+20:00:08.579 Restored build cache from previous deployment (9eNZDn3crs2rao7qjSaVM1JD6xZD)
+20:00:09.275 Running "vercel build"
+20:00:09.303 Vercel CLI 62.7.0
+20:00:10.388 Detected `pnpm-lock.yaml` 9 which may be generated by pnpm@9.x, pnpm@10.x, or pnpm@11.x
+20:00:10.388 Using pnpm@10.x based on project creation date
+20:00:10.388 To use a different version, set package.json#packageManager or package.json#devEngines.packageManager
+20:00:10.400 Installing dependencies...
+20:00:11.120 Lockfile is up to date, resolution step is skipped
+20:00:11.246 Already up to date
+20:00:16.370 
+20:00:16.505 Done in 6s using pnpm v10.28.0
+20:00:16.598 Running "pnpm run build"
+20:00:17.001 
+20:00:17.001 > trace-office@0.1.0 build /vercel/path0
+20:00:17.001 > node scripts/build-bridge.mjs && tsc -b && vite build
+20:00:17.001 
+20:00:24.433 src/components/import/Welcome.tsx(150,30): error TS2345: Argument of type 'LocalSource' is not assignable to parameter of type '"grok" | "index" | "editors"'.
+20:00:24.433   Type '"discover"' is not assignable to type '"grok" | "index" | "editors"'.
+20:00:24.486  ELIFECYCLE  Command failed with exit code 1.
+20:00:24.761 Error: Command "pnpm run build" exited with 1
