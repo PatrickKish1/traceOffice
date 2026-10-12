@@ -70,6 +70,35 @@ npx @neatlogs/claude-code setup --global --api-key "$NEATLOGS_API_KEY"
 
 Restart Claude Code after that. The office still only needs the session file time to show who is operating. The hooks are what fill the trace tree.
 
+## cfo.ai
+
+cfo.ai is where the price, the costs, and the runway belong. Cursor can reach it through the MCP server at `https://api.cfo.ai/mcp`, which is already listed in `.cursor/mcp.json`. The sheet in `evidence/cfo-business-plan.md` is the plan prepared for that workspace. It is not a signed-in export, and the in-app Business plan panel shows the same assumptions.
+
+The struggle was treating $1,960 of revenue as a business. Forty teams at $49 a month produce that number. Neatlogs, hosting, and support then take it down to $1,210, and one founder still costs $4,000 a month. The base case does not cover the founder. Putting those facts in one cfo.ai-shaped sheet is what made the miss obvious: one seat price, Neatlogs left as the usage bill, and a second case of 120 teams that covers the founder with about $180 left. Nobody is hired until that growth case is real.
+
+## Entire
+
+Entire records the agent session behind a commit and keeps that session with the commit. This repository is already enabled, so a clone gets the same setup:
+
+- `.entire/settings.json` stores checkpoints as git refs and syncs them to `origin`.
+- `.cursor/hooks.json` calls the Entire CLI from Cursor. If the CLI is not installed, the hooks do nothing and the editor still works.
+
+Install the CLI once:
+
+```sh
+brew install entireio/tap/entire
+```
+
+On Linux, `curl -fsSL https://entire.io/install.sh | bash`. Then work in Cursor as usual. A checkpoint is written when you commit, not before. The commit message gains a trailer, `Entire-Checkpoint: <id>`. On `git push`, those checkpoint refs go to origin with the branch. `npm run entire:status` shows whether this checkout is enabled.
+
+Open a checkpoint on Entire. The commit SHA has to be the full one:
+
+- [Typecheck fix](https://entire.io/gh/PatrickKish1/traceOffice/commit/34318789208ef384f85ea584035cc35003aab141) — `01M4RVJ3KDT91TGRVXDMNTN8DR`
+- [Demo and recent seats](https://entire.io/gh/PatrickKish1/traceOffice/commit/348007522fda654609549e5bc574af8a801ad138) — `01M4RV6G5EWDV8875WCXRZEFXQ`
+- [Neatlogs session reporting](https://entire.io/gh/PatrickKish1/traceOffice/commit/1b80fff3057ef2a7f5d408953d495d322582447f) — `01M4KNQHESBV27DJV6DWX2A9Q8`
+
+The same commits on GitHub carry the trailer in the message, for example [3431878](https://github.com/PatrickKish1/traceOffice/commit/34318789208ef384f85ea584035cc35003aab141). Locally, `entire checkpoint list` and `entire checkpoint explain <id>` open the session without a browser.
+
 ## Direction
 
 The office stays the control room. The next slice is to drive those same characters from Neatlogs traces, and to open the real trace when you click one. Local file watch remains the path that works without a token.
